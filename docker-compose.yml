@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: sih_court_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_court_system
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Mount schema to auto-initialize DB on startup
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_court_system"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ai-module:
+    build:
+      context: ./ai-module
+      dockerfile: Dockerfile
+    container_name: sih_court_ai_agent
+    restart: always
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: sih_court_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ai_court_system
+      - JWT_SECRET=sih_2025_court_system_jwt_secret_key_998877
+      - JWT_EXPIRES_IN=24h
+      - AI_AGENT_URL=http://ai-module:5001
+      - NODE_ENV=development
+    volumes:
+      - ./server/uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      ai-module:
+        condition: service_started
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: sih_court_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
