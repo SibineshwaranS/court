@@ -6,7 +6,7 @@ const generateToken = (id) => {
   return jwt.sign(
     { id }, 
     process.env.JWT_SECRET || 'sih_2025_court_system_jwt_secret_key_998877', 
-    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
   );
 };
 
