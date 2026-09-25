@@ -15,21 +15,50 @@ const pool = new Pool({
 
 let useInMemory = false;
 
-pool.on('connect', (client) => {
+pool.on('connect', async (client) => {
   console.log('PostgreSQL database connected successfully');
   useInMemory = false;
-  client.query(`
-    DELETE FROM cases WHERE case_number LIKE 'C-2026-%';
-    UPDATE cases SET case_number = 'TN-CRL-2026-0001' WHERE case_number = 'C-2026-0001';
-    UPDATE cases SET case_number = 'TN-OS-2026-0002' WHERE case_number = 'C-2026-0002';
-    UPDATE cases SET case_number = 'TN-FC-2026-0003' WHERE case_number = 'C-2026-0003';
-    UPDATE cases SET case_number = 'TN-CRL-2026-0004' WHERE case_number = 'C-2026-0004';
-    UPDATE cases SET case_number = 'TN-OS-2026-0005' WHERE case_number = 'C-2026-0005';
-    UPDATE cases SET case_number = 'TN-COMM-2026-0006' WHERE case_number = 'C-2026-0006';
-    UPDATE cases SET case_number = 'TN-CRL-2026-9041' WHERE case_number = 'C-2026-9041';
-    UPDATE cases SET case_number = 'TN-CS-2026-9042' WHERE case_number = 'C-2026-9042';
-    UPDATE cases SET case_number = 'TN-CRL-2026-0101' WHERE case_number = 'C-2026-0101';
-  `).catch(err => console.log('DB auto-migration check:', err.message));
+  try {
+    // Clean legacy C-2026- format case numbers
+    await client.query(`DELETE FROM cases WHERE case_number LIKE 'C-2026-%'`);
+    
+    // Auto-seed if database cases table is empty
+    const countRes = await client.query('SELECT COUNT(*) FROM cases');
+    if (parseInt(countRes.rows[0]?.count || 0, 10) === 0) {
+      console.log('Database cases table is empty. Seeding TN eFiling 3.0 cases...');
+      
+      await client.query(`
+        INSERT INTO users (username, password_hash, email, role, full_name) VALUES
+        ('admin', '$2a$10$.qGM4T3swmiHaIO92f71NeBBV1coNxOM9i.E5GFkgadwkpVpkM.fS', 'admin@court.gov.in', 'Administrator', 'System Administrator'),
+        ('judge_sharma', '$2a$10$.qGM4T3swmiHaIO92f71NeBBV1coNxOM9i.E5GFkgadwkpVpkM.fS', 'sharma@court.gov.in', 'Judge', 'Hon''ble Judge Rajesh Sharma'),
+        ('judge_patel', '$2a$10$.qGM4T3swmiHaIO92f71NeBBV1coNxOM9i.E5GFkgadwkpVpkM.fS', 'patel@court.gov.in', 'Judge', 'Hon''ble Judge Sneha Patel'),
+        ('judge_verma', '$2a$10$.qGM4T3swmiHaIO92f71NeBBV1coNxOM9i.E5GFkgadwkpVpkM.fS', 'verma@court.gov.in', 'Judge', 'Hon''ble Judge Amit Verma'),
+        ('clerk_roy', '$2a$10$.qGM4T3swmiHaIO92f71NeBBV1coNxOM9i.E5GFkgadwkpVpkM.fS', 'roy@court.gov.in', 'Court Clerk', 'Senior Clerk Dipak Roy')
+        ON CONFLICT (username) DO NOTHING;
+
+        INSERT INTO judges (user_id, specialization, courtroom, status, contact_number) VALUES
+        ((SELECT id FROM users WHERE username = 'judge_sharma'), 'Criminal', 'Courtroom 101', 'Active', '9876543210'),
+        ((SELECT id FROM users WHERE username = 'judge_patel'), 'Civil', 'Courtroom 102', 'Active', '9876543211'),
+        ((SELECT id FROM users WHERE username = 'judge_verma'), 'Family', 'Courtroom 103', 'Active', '9876543212')
+        ON CONFLICT (user_id) DO NOTHING;
+
+        INSERT INTO cases (case_number, title, description, case_type, status, filing_date, priority, priority_score, predicted_delay, judge_id, bench, district, petitioner_name, respondent_name, custody_status, is_senior_citizen, legal_act) VALUES
+        ('TN-CRL-2026-0001', 'State vs. Rakesh Kumar', 'Cargo theft near Chennai Port under IPC Section 379.', 'Criminal', 'Hearing', '2026-01-10', 'High', 80, 100, (SELECT id FROM judges WHERE user_id = (SELECT id FROM users WHERE username = 'judge_sharma')), 'Madras High Court - Principal Bench', 'Chennai', 'State of Tamil Nadu', 'Rakesh Kumar', 'In Judicial Custody', false, 'Indian Penal Code (IPC)'),
+        ('TN-OS-2026-0002', 'Sharma Realty vs. Gupta & Sons', 'Dispute over commercial rental property lease agreement.', 'Civil', 'Hearing', '2026-02-15', 'Medium', 52, 120, (SELECT id FROM judges WHERE user_id = (SELECT id FROM users WHERE username = 'judge_patel')), 'District & Sessions Courts of Tamil Nadu', 'Coimbatore', 'Sharma Realty', 'Gupta & Sons', 'N/A', false, 'Code of Civil Procedure (CPC)'),
+        ('TN-FC-2026-0003', 'Ananya Sen vs. Rahul Sen', 'Petition for child custody and maintenance support.', 'Family', 'Disposed', '2026-03-05', 'High', 91, 15, (SELECT id FROM judges WHERE user_id = (SELECT id FROM users WHERE username = 'judge_verma')), 'District Family Court - Chennai', 'Chennai', 'Ananya Sen', 'Rahul Sen', 'N/A', false, 'Hindu Marriage Act 1955'),
+        ('TN-CRL-2026-0004', 'State vs. Mohan Singh & Ors.', 'Attempted robbery and criminal conspiracy near NH 8.', 'Criminal', 'Hearing', '2026-04-20', 'Medium', 65, 70, (SELECT id FROM judges WHERE user_id = (SELECT id FROM users WHERE username = 'judge_sharma')), 'Madras High Court - Principal Bench', 'Madurai', 'State of Tamil Nadu', 'Mohan Singh & Ors.', 'Bail Granted', false, 'Indian Penal Code (IPC)'),
+        ('TN-OS-2026-0005', 'Verma Tech vs. Zenith Solutions', 'Breach of software service level agreement.', 'Civil', 'Disposed', '2026-01-05', 'Low', 30, 0, (SELECT id FROM judges WHERE user_id = (SELECT id FROM users WHERE username = 'judge_patel')), 'District & Sessions Courts of Tamil Nadu', 'Salem', 'Verma Tech', 'Zenith Solutions', 'N/A', false, 'Indian Contract Act 1872'),
+        ('TN-COMM-2026-0006', 'Mehra Exports vs. Customs Commissioner', 'Customs duty tax appeal case for import shipment.', 'Commercial', 'Pending', '2026-05-12', 'Medium', 45, 180, (SELECT id FROM judges WHERE user_id = (SELECT id FROM users WHERE username = 'judge_patel')), 'Madras High Court - Commercial Division', 'Chennai', 'Mehra Exports', 'Customs Commissioner', 'N/A', false, 'Customs Act 1962'),
+        ('TN-CRL-2026-9041', 'State vs. Suresh Malhotra (Senior Citizen)', 'Pharmaceutical forgery and medical negligence suit.', 'Criminal', 'Disposed', '2026-07-31', 'High', 90, 50, (SELECT id FROM judges WHERE user_id = (SELECT id FROM users WHERE username = 'judge_sharma')), 'Madras High Court - Principal Bench', 'Chennai', 'State of Tamil Nadu', 'Suresh Malhotra', 'Bail Granted', true, 'Drugs and Cosmetics Act 1940'),
+        ('TN-CS-2026-9042', 'Dinesh Exports vs. Zenith Logistics', 'Commercial shipping freight damage and breach of contract.', 'Civil', 'Hearing', '2026-07-31', 'Medium', 50, 90, (SELECT id FROM judges WHERE user_id = (SELECT id FROM users WHERE username = 'judge_patel')), 'District & Sessions Courts of Tamil Nadu', 'Coimbatore', 'Dinesh Exports', 'Zenith Logistics', 'N/A', false, 'Indian Contract Act 1872'),
+        ('TN-CRL-2026-0101', 'State vs. Vikram Singh & Ors.', 'Multiple cyber banking fraud and money laundering conspiracy.', 'Criminal', 'Hearing', '2026-08-13', 'High', 90, 50, (SELECT id FROM judges WHERE user_id = (SELECT id FROM users WHERE username = 'judge_sharma')), 'Madras High Court - Principal Bench', 'Madurai', 'State of Tamil Nadu', 'Vikram Singh & Ors.', 'In Judicial Custody', false, 'Prevention of Money Laundering Act (PMLA)')
+        ON CONFLICT (case_number) DO NOTHING;
+      `);
+      console.log('Database cases table successfully populated with TN eFiling 3.0 cases!');
+    }
+  } catch (err) {
+    console.log('DB auto-seeder check:', err.message);
+  }
 });
 
 pool.on('error', (err) => {
