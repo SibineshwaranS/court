@@ -62,18 +62,16 @@ const getCases = async (req, res, next) => {
       paramIndex++;
     }
 
-    // Sorting: High priority first, then filing date descending
-    queryText += ` ORDER BY CASE 
-      WHEN c.priority = 'High' THEN 1 
-      WHEN c.priority = 'Medium' THEN 2 
-      ELSE 3 END ASC, c.filing_date DESC`;
+    // Sorting: High priority score first, then filing date descending
+    queryText += ` ORDER BY c.priority_score DESC, c.filing_date DESC`;
 
-    // Add pagination
-    queryText += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
-    params.push(parseInt(limit, 10));
-    params.push(parseInt(offset, 10));
+    // Add pagination with validated integer values for PostgreSQL
+    const safeLimit = Math.max(1, parseInt(limit || 8, 10));
+    const safeOffset = Math.max(0, parseInt(offset || 0, 10));
+    queryText += ` LIMIT ${safeLimit} OFFSET ${safeOffset}`;
 
     const result = await db.query(queryText, params);
+    console.log('GET CASES DEBUG:', { params, rowsCount: result.rows?.length });
 
     // Get total count for pagination metadata
     let countQuery = `

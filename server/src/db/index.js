@@ -420,8 +420,8 @@ function handleInMemoryQuery(text, params = []) {
       }
     }
 
-    if (lowerSql.includes('and c.judge_id =') || lowerSql.includes('where c.judge_id =')) {
-      const jIdParam = params.find(p => typeof p === 'number' && !isNaN(p) && p !== 8 && p !== 5 && p !== 10);
+    if (lowerSql.includes('where c.judge_id =') || lowerSql.includes('and c.judge_id =')) {
+      const jIdParam = params.find(p => typeof p === 'number' && p >= 1 && p <= 4);
       if (jIdParam) {
         filteredCases = filteredCases.filter(c => c.judge_id === jIdParam);
       }
