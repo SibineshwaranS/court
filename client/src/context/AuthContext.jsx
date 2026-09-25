@@ -25,8 +25,12 @@ export const AuthProvider = ({ children }) => {
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
         } catch (err) {
-          console.error('Invalid token on load, logging out', err);
-          logout();
+          if (err.response && err.response.status === 401) {
+            console.error('Invalid token on load, logging out', err);
+            logout();
+          } else {
+            console.warn('Network error or server cold start during profile check. Preserving cached session.');
+          }
         }
       }
       setLoading(false);
