@@ -225,6 +225,11 @@ const Cases = () => {
   // Handle Multi-part Case Registration
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
+    // Do not submit form if user is navigating intermediate steps (1-7)
+    if (currentStep < 8) {
+      setCurrentStep(prev => Math.min(8, prev + 1));
+      return;
+    }
     setModalError('');
     setSubmitting(true);
 
@@ -541,6 +546,7 @@ const Cases = () => {
                   👵 Fill Senior Citizen Case
                 </button>
                 <button 
+                  type="button"
                   onClick={() => setShowModal(false)}
                   className="p-1.5 hover:bg-gray-200 dark:hover:bg-court-800 text-gray-400 rounded-full transition-all ml-2"
                 >
@@ -562,6 +568,7 @@ const Cases = () => {
                 { id: 8, title: '8. Upload & Submit' }
               ].map((step) => (
                 <button
+                  type="button"
                   key={step.id}
                   onClick={() => setCurrentStep(step.id)}
                   className={`px-3 py-1.5 rounded-lg whitespace-nowrap font-semibold transition-all ${
