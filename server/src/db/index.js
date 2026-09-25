@@ -15,9 +15,20 @@ const pool = new Pool({
 
 let useInMemory = false;
 
-pool.on('connect', () => {
+pool.on('connect', (client) => {
   console.log('PostgreSQL database connected successfully');
   useInMemory = false;
+  client.query(`
+    UPDATE cases SET case_number = 'TN-CRL-2026-0001' WHERE case_number = 'C-2026-0001';
+    UPDATE cases SET case_number = 'TN-OS-2026-0002' WHERE case_number = 'C-2026-0002';
+    UPDATE cases SET case_number = 'TN-FC-2026-0003' WHERE case_number = 'C-2026-0003';
+    UPDATE cases SET case_number = 'TN-CRL-2026-0004' WHERE case_number = 'C-2026-0004';
+    UPDATE cases SET case_number = 'TN-OS-2026-0005' WHERE case_number = 'C-2026-0005';
+    UPDATE cases SET case_number = 'TN-COMM-2026-0006' WHERE case_number = 'C-2026-0006';
+    UPDATE cases SET case_number = 'TN-CRL-2026-9041' WHERE case_number = 'C-2026-9041';
+    UPDATE cases SET case_number = 'TN-CS-2026-9042' WHERE case_number = 'C-2026-9042';
+    UPDATE cases SET case_number = 'TN-CRL-2026-0101' WHERE case_number = 'C-2026-0101';
+  `).catch(err => console.log('DB auto-migration check:', err.message));
 });
 
 pool.on('error', (err) => {

@@ -60,7 +60,7 @@ ON CONFLICT DO NOTHING;
 
 -- 7. Insert Notifications
 INSERT INTO notifications (user_id, message, type, status) VALUES
-((SELECT id FROM users WHERE username = 'judge_sharma'), 'High Priority Case State vs. Vikram Singh & Ors. (C-2026-0101) assigned to your bench.', 'Priority Alert', 'Pending'),
-((SELECT id FROM users WHERE username = 'judge_patel'), 'Hearing scheduled for Dinesh Exports vs. Zenith Logistics (C-2026-9042).', 'Schedule Update', 'Pending'),
-((SELECT id FROM users WHERE username = 'clerk_roy'), 'eFiling document uploaded for case C-2026-9041.', 'In-App', 'Read')
+((SELECT id FROM users WHERE username = 'judge_sharma'), 'High Priority Case State vs. Vikram Singh & Ors. (TN-CRL-2026-0101) assigned to your bench.', 'Priority Alert', 'Pending'),
+((SELECT id FROM users WHERE username = 'judge_patel'), 'Hearing scheduled for Dinesh Exports vs. Zenith Logistics (TN-CS-2026-9042).', 'Schedule Update', 'Pending'),
+((SELECT id FROM users WHERE username = 'clerk_roy'), 'eFiling document uploaded for case TN-CRL-2026-9041.', 'In-App', 'Read')
 ON CONFLICT DO NOTHING;
