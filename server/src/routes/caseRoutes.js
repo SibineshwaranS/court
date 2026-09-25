@@ -42,10 +42,18 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
+// Case registration fields uploader
+const registrationUpload = upload.fields([
+  { name: 'plaint_pdf', maxCount: 1 },
+  { name: 'vakalatnama_pdf', maxCount: 1 },
+  { name: 'impugned_order_pdf', maxCount: 1 },
+  { name: 'file', maxCount: 1 }
+]);
+
 // Case routes
 router.get('/', protect, caseController.getCases);
 router.get('/:id', protect, caseController.getCaseById);
-router.post('/', protect, authorize('Administrator', 'Court Clerk'), caseController.createCase);
+router.post('/', protect, authorize('Administrator', 'Court Clerk'), registrationUpload, caseController.createCase);
 router.put('/:id', protect, authorize('Administrator', 'Court Clerk', 'Judge'), caseController.updateCase);
 router.delete('/:id', protect, authorize('Administrator'), caseController.deleteCase);
 

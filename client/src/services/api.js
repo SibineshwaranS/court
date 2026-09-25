@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Create Axios Instance
+// Create Axios Instance targeting local Express server (port 5000)
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'https://court-6lbv.onrender.com/api'),
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -26,14 +26,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // If unauthorized (token expired or invalid), clear localStorage and redirect to login
-    if (error.response && error.response.status === 401) {
-      console.warn('Unauthorized request - token may have expired. Logging out.');
+    const isLoginRequest = error.config && error.config.url && error.config.url.includes('/auth/login');
+    const isLoginPage = window.location.pathname.includes('/login');
+
+    // Handle 401 Unauthorized (expired/invalid token)
+    if (error.response && error.response.status === 401 && !isLoginRequest) {
+      console.warn('Unauthorized request - token expired or invalid.');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       
-      // Prevent infinite redirect loops if we are already on login page
-      if (!window.location.pathname.includes('/login')) {
+      // Redirect to login only if not already on login page
+      if (!isLoginPage) {
         window.location.href = '/login?expired=true';
       }
     }

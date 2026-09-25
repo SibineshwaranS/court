@@ -281,11 +281,99 @@ const CaseDetail = () => {
         {/* Left Column: Details, Documents, Assignment */}
         <div className="lg:col-span-8 space-y-6">
           
+          {/* Lawsuit Docket Metadata Card */}
+          <div className="bg-white border border-gray-200 rounded-3xl p-6 dark:bg-court-900 dark:border-court-800 shadow-sm space-y-4">
+            <h3 className="font-outfit font-bold text-lg text-gray-850 dark:text-white flex items-center justify-between border-b pb-3">
+              <span className="flex items-center gap-2">
+                <Scale size={18} className="text-court-500" />
+                <span>Lawsuit Docket Metadata</span>
+              </span>
+              <span className="text-xs font-bold bg-court-500/10 text-court-600 dark:text-court-300 px-3 py-1 rounded-full">
+                {caseData.bench || 'Madras High Court'}
+              </span>
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-3 bg-gray-50 dark:bg-court-950 rounded-xl space-y-1">
+                <span className="text-gray-400 block font-semibold">Filing Advocate & Bar Roll:</span>
+                <p className="font-bold text-gray-800 dark:text-white text-sm">
+                  {caseData.advocate_name || 'Advocate Unregistered'}
+                </p>
+                <p className="font-mono text-court-600 dark:text-court-300 font-bold">
+                  {caseData.bar_enrollment_number || 'MS/xxxx/xxxx'}
+                </p>
+                {caseData.advocate_phone && <p className="text-gray-500">Contact: {caseData.advocate_phone}</p>}
+              </div>
+
+              <div className="p-3 bg-gray-50 dark:bg-court-950 rounded-xl space-y-1">
+                <span className="text-gray-400 block font-semibold">Jurisdiction & Establishment:</span>
+                <p className="font-bold text-gray-800 dark:text-white">
+                  {caseData.court_establishment || 'District & Sessions Court'}
+                </p>
+                <p className="text-gray-500">District: {caseData.district || 'Chennai'}, {caseData.state || 'Tamil Nadu'}</p>
+                <p className="text-gray-500">Filing Type: <strong className="text-gray-700 dark:text-gray-200">{caseData.filing_type || 'Main Suit'}</strong></p>
+              </div>
+            </div>
+
+            {/* Litigant Vulnerability Badges (Vector 1 & Vector 2) */}
+            <div className="p-4 bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-2xl space-y-2">
+              <span className="block text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
+                ⚖️ Litigant Profile & Risk Attributes
+              </span>
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="px-2.5 py-1 bg-white dark:bg-court-900 rounded-lg font-semibold text-gray-700 dark:text-gray-200 border">
+                  Petitioner: <strong>{caseData.petitioner_name || caseData.title}</strong> ({caseData.petitioner_age || 35} yrs, {caseData.petitioner_gender || 'M'})
+                </span>
+                {caseData.is_senior_citizen && (
+                  <span className="px-2.5 py-1 bg-amber-500 text-white rounded-lg font-bold">
+                    👵 Senior Citizen Priority
+                  </span>
+                )}
+                {caseData.is_differently_abled && (
+                  <span className="px-2.5 py-1 bg-indigo-500 text-white rounded-lg font-bold">
+                    ♿ Differently Abled (PwD)
+                  </span>
+                )}
+                {caseData.is_terminally_ill && (
+                  <span className="px-2.5 py-1 bg-red-600 text-white rounded-lg font-bold animate-pulse">
+                    🏥 Terminally Ill Emergency
+                  </span>
+                )}
+                {caseData.custody_status === 'In Judicial Custody' && (
+                  <span className="px-2.5 py-1 bg-red-600 text-white rounded-lg font-bold">
+                    ⛓️ In Judicial Custody ({caseData.detention_days || 0} Days)
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Legal Act, Police & eGRAS Info */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div className="p-3 bg-gray-50 dark:bg-court-950 rounded-xl">
+                <span className="text-gray-400 block font-semibold">Primary Act & Section:</span>
+                <strong className="text-gray-800 dark:text-white">{caseData.legal_act || 'IPC'}</strong>
+                <p className="text-gray-500 font-mono">Sec {caseData.legal_section || 'N/A'}</p>
+              </div>
+
+              <div className="p-3 bg-gray-50 dark:bg-court-950 rounded-xl">
+                <span className="text-gray-400 block font-semibold">Police Station & FIR:</span>
+                <strong className="text-gray-800 dark:text-white">{caseData.police_station || 'N/A'}</strong>
+                <p className="text-gray-500 font-mono">FIR #{caseData.fir_number || 'N/A'}/{caseData.fir_year || ''}</p>
+              </div>
+
+              <div className="p-3 bg-gray-50 dark:bg-court-950 rounded-xl">
+                <span className="text-gray-400 block font-semibold">TN eGRAS Receipt GRN:</span>
+                <strong className="text-emerald-600 dark:text-emerald-400 font-mono">{caseData.egras_grn_number || 'N/A'}</strong>
+                <p className="text-gray-500">Fee: ₹{caseData.court_fee_paid || 0}</p>
+              </div>
+            </div>
+          </div>
+
           {/* Lawsuit Facts & Details */}
           <div className="bg-white border border-gray-200 rounded-3xl p-6 dark:bg-court-900 dark:border-court-800 shadow-sm">
             <h3 className="font-outfit font-bold text-lg text-gray-850 dark:text-white mb-4 flex items-center gap-2">
-              <Scale size={18} className="text-court-500" />
-              <span>Lawsuit Particulars & Facts</span>
+              <FileText size={18} className="text-court-500" />
+              <span>Lawsuit Summary & Case Facts (AI Analytical Input)</span>
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
               {caseData.description || 'No lawsuit description details provided.'}

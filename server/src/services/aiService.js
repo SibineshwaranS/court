@@ -3,61 +3,136 @@ require('dotenv').config();
 
 const AI_AGENT_URL = process.env.AI_AGENT_URL || 'http://localhost:5001';
 
-// Local Fallback Algorithm (Ensures the backend remains fully operational even if the AI server is offline)
+// Local Fallback Algorithm using the 7-Vector Judicial Matrix
 function localAIFallback(caseData) {
-  console.log('[AI Service] Using local fallback AI simulation (External API offline)');
+  console.log('[AI Service] Executing 7-Vector Judicial Matrix Fallback Engine');
   const title = (caseData.title || '').toLowerCase();
   const description = (caseData.description || '').toLowerCase();
   const caseType = (caseData.case_type || '').toLowerCase();
-  const filingDateStr = caseData.filing_date;
+  const filingType = (caseData.filing_type || '').toLowerCase();
+  const legalAct = (caseData.legal_act || '').toLowerCase();
+  const legalSection = (caseData.legal_section || '').toLowerCase();
+  const custodyStatus = caseData.custody_status || 'N/A';
+  const detentionDays = parseInt(caseData.detention_days || 0, 10);
+  const petitionerAge = parseInt(caseData.petitioner_age || 35, 10);
+  const isSeniorCitizen = Boolean(caseData.is_senior_citizen || petitionerAge >= 60);
+  const isDifferentlyAbled = Boolean(caseData.is_differently_abled);
+  const isTerminallyIll = Boolean(caseData.is_terminally_ill);
+  const trialStage = caseData.trial_stage || 'Filing & Scrutiny';
+  const valuation = parseFloat(caseData.valuation_amount || 0);
 
-  let priority = 'Medium';
-  let priorityScore = 50;
-  let predictedDelay = 90;
+  let priorityScore = 40; // Base score
+  let predictedDelay = 90; // Default days
   const reasons = [];
 
-  if (filingDateStr) {
-    const filingDate = new Date(filingDateStr);
-    const diffTime = Math.abs(new Date() - filingDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays > 365) {
-      priorityScore += 25;
-      predictedDelay += 60;
-      reasons.push(`Pending for ${diffDays} Days`);
-    } else if (diffDays > 180) {
+  // Vector 1: Litigant Vulnerability & Health Factors
+  if (isTerminallyIll || description.includes('terminal') || description.includes('cancer')) {
+    priorityScore += 35;
+    predictedDelay -= 45;
+    reasons.push('V1: Terminally Ill Litigant / Severe Health Condition');
+  } else if (petitionerAge >= 75) {
+    priorityScore += 30;
+    predictedDelay -= 35;
+    reasons.push(`V1: Super Senior Citizen Litigant (Age ${petitionerAge})`);
+  } else if (isSeniorCitizen) {
+    priorityScore += 20;
+    predictedDelay -= 25;
+    reasons.push(`V1: Senior Citizen Litigant (Age ${petitionerAge})`);
+  }
+
+  if (isDifferentlyAbled) {
+    priorityScore += 20;
+    predictedDelay -= 20;
+    reasons.push('V1: Differently Abled Person (PwD Protection)');
+  }
+
+  // Vector 2: Detention, Liberty & BNSS Sec 479 Statutory Half-Sentence Rule
+  if (custodyStatus === 'In Judicial Custody') {
+    priorityScore += 30;
+    predictedDelay -= 40;
+    reasons.push(`V2: Accused in Judicial Custody (${detentionDays} Days in Jail)`);
+    if (detentionDays > 180) {
       priorityScore += 10;
-      predictedDelay += 30;
-      reasons.push(`Pending for ${diffDays} Days`);
+      reasons.push('V2: BNSS Sec 479 Extended Undertrial Custody Flag');
     }
   }
 
-  if (caseType === 'criminal') {
-    priorityScore += 15;
+  // Vector 3: Offense Gravity & Special Protection Acts
+  if (legalAct.includes('pocso') || description.includes('pocso') || description.includes('minor')) {
+    priorityScore += 30;
+    predictedDelay -= 30;
+    reasons.push('V3: POCSO Act / Protection of Children Special Fast-Track');
+  } else if (legalAct.includes('domestic violence') || description.includes('domestic violence') || legalSection.includes('125')) {
+    priorityScore += 25;
+    predictedDelay -= 25;
+    reasons.push('V3: Domestic Violence / Spousal Maintenance Fast-Track');
+  } else if (legalAct.includes('sc/st') || description.includes('atrocities')) {
+    priorityScore += 20;
     predictedDelay -= 20;
-    reasons.push('Serious Criminal Case');
-  } else if (caseType === 'family') {
+    reasons.push('V3: SC/ST Prevention of Atrocities Statutory Priority');
+  } else if (legalSection.includes('302') || legalSection.includes('307') || legalSection.includes('376')) {
+    priorityScore += 20;
+    predictedDelay -= 20;
+    reasons.push(`V3: Serious Offense Charged (Section ${legalSection})`);
+  }
+
+  // Vector 4: Irreparable Loss & Emergency Relief Criteria
+  if (filingType.includes('bail') || title.includes('bail')) {
+    priorityScore += 25;
+    predictedDelay -= 35;
+    reasons.push('V4: Urgent Liberty / Bail Application');
+  } else if (description.includes('demolition') || description.includes('eviction') || description.includes('stay')) {
+    priorityScore += 25;
+    predictedDelay -= 30;
+    reasons.push('V4: Emergency Injunction / Threat of Irreparable Harm');
+  }
+
+  // Vector 5: Case Age & Systemic Pendency
+  if (caseData.filing_date) {
+    const filingDate = new Date(caseData.filing_date);
+    const diffDays = Math.ceil(Math.abs(new Date() - filingDate) / (1000 * 60 * 60 * 24));
+    if (diffDays > 365) {
+      priorityScore += 25;
+      reasons.push(`V5: Pendency Arrears Priority (${diffDays} Days Pending)`);
+    } else if (diffDays > 180) {
+      priorityScore += 10;
+      reasons.push(`V5: Backlog Monitoring (${diffDays} Days Pending)`);
+    }
+  }
+
+  // Vector 6: Trial Stage & Disposal Potential
+  if (trialStage === 'Final Arguments') {
+    priorityScore += 25;
+    predictedDelay -= 40;
+    reasons.push('V6: Final Arguments Stage (Targeted for Immediate Disposal)');
+  } else if (trialStage === 'Defense Evidence' || trialStage === 'Prosecution Evidence') {
     priorityScore += 15;
     predictedDelay -= 15;
-    reasons.push('Family Court Dispute');
+    reasons.push(`V6: Active Trial Stage (${trialStage})`);
   }
 
-  if (description.includes('senior') || title.includes('senior')) {
-    priorityScore += 25;
-    predictedDelay -= 20;
-    reasons.push('Senior Citizen Involved');
+  // Vector 7: Commercial Valuation Impact
+  if (valuation >= 10000000) {
+    priorityScore += 15;
+    reasons.push(`V7: Commercial Court High Stake Claim (₹${(valuation/100000).toFixed(1)} Lakhs)`);
   }
 
+  // Cap Score 0 to 100
+  priorityScore = Math.min(100, Math.max(0, priorityScore));
+  predictedDelay = Math.max(7, Math.round(predictedDelay));
+
+  let priority = 'Medium';
   if (priorityScore >= 75) priority = 'High';
   else if (priorityScore <= 35) priority = 'Low';
 
   if (reasons.length === 0) {
-    reasons.push('Standard scheduling backlog');
+    reasons.push('Standard procedural queue priority');
   }
 
   return {
     priority,
     priority_score: priorityScore,
-    predicted_delay: Math.max(15, predictedDelay),
+    predicted_delay: predictedDelay,
     reason: reasons
   };
 }

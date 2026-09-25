@@ -188,9 +188,20 @@ const getCaseById = async (req, res, next) => {
   }
 };
 
-// Create a new case
+// Create a new case (Tamil Nadu eFiling 3.0 & 7-Vector Judicial Matrix Integration)
 const createCase = async (req, res, next) => {
-  const { case_number, title, description, case_type, filing_date, judge_id } = req.body;
+  const { 
+    case_number, title, description, case_type, filing_date, judge_id,
+    bench, state, district, court_establishment, filing_type, valuation_amount,
+    advocate_name, bar_enrollment_number, advocate_phone,
+    petitioner_name, petitioner_type, petitioner_age, petitioner_gender,
+    is_senior_citizen, is_differently_abled, is_terminally_ill, petitioner_phone, petitioner_email, petitioner_address,
+    respondent_name, respondent_type, respondent_address,
+    legal_act, legal_section, police_station, fir_number, fir_year, custody_status, detention_days,
+    lower_court_name, lower_court_case_number, lower_court_order_date,
+    caveat_filed, caveat_number, egras_grn_number, court_fee_paid,
+    cause_of_action_date, cause_of_action_place, trial_stage
+  } = req.body;
 
   try {
     if (!case_number || !title || !case_type) {
@@ -205,20 +216,57 @@ const createCase = async (req, res, next) => {
       return next(new Error(`Case number ${case_number} already exists`));
     }
 
-    // 1. Initial prediction call (before inserting case, or right after)
-    // Run mock prediction
-    const aiResult = await aiService.getPredictions({
+    // 1. Prepare 7-Vector AI Payload
+    const aiPayload = {
       title,
       description,
       case_type,
+      filing_type,
+      bench: bench || 'Madras High Court - Principal Bench',
+      legal_act: legal_act || 'Indian Penal Code (IPC)',
+      legal_section: legal_section || '',
+      petitioner_name: petitioner_name || title,
+      petitioner_age: parseInt(petitioner_age || 35, 10),
+      is_senior_citizen: is_senior_citizen === true || is_senior_citizen === 'true' || parseInt(petitioner_age || 0, 10) >= 60,
+      is_differently_abled: is_differently_abled === true || is_differently_abled === 'true',
+      is_terminally_ill: is_terminally_ill === true || is_terminally_ill === 'true',
+      respondent_name: respondent_name || '',
+      custody_status: custody_status || 'N/A',
+      detention_days: parseInt(detention_days || 0, 10),
+      police_station: police_station || '',
+      fir_number: fir_number || '',
+      fir_year: fir_year || null,
+      trial_stage: trial_stage || 'Filing & Scrutiny',
+      valuation_amount: parseFloat(valuation_amount || 0),
       filing_date: filing_date || new Date().toISOString().split('T')[0]
-    });
+    };
 
-    // 2. Insert case into DB
+    // Run AI Prediction
+    const aiResult = await aiService.getPredictions(aiPayload);
+
+    // 2. Insert case into DB with expanded columns
     const insertRes = await db.query(
-      `INSERT INTO cases (case_number, title, description, case_type, filing_date, priority, priority_score, predicted_delay, judge_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING *`,
+      `INSERT INTO cases (
+        case_number, title, description, case_type, filing_date, priority, priority_score, predicted_delay, judge_id,
+        bench, state, district, court_establishment, filing_type, valuation_amount,
+        advocate_name, bar_enrollment_number, advocate_phone,
+        petitioner_name, petitioner_type, petitioner_age, petitioner_gender, is_senior_citizen, is_differently_abled, is_terminally_ill, petitioner_phone, petitioner_email, petitioner_address,
+        respondent_name, respondent_type, respondent_address,
+        legal_act, legal_section, police_station, fir_number, fir_year, custody_status, detention_days,
+        lower_court_name, lower_court_case_number, lower_court_order_date,
+        caveat_filed, caveat_number, egras_grn_number, court_fee_paid,
+        cause_of_action_date, cause_of_action_place, trial_stage
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9,
+        $10, $11, $12, $13, $14, $15,
+        $16, $17, $18,
+        $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
+        $29, $30, $31,
+        $32, $33, $34, $35, $36, $37, $38,
+        $39, $40, $41,
+        $42, $43, $44, $45,
+        $46, $47, $48
+      ) RETURNING *`,
       [
         case_number,
         title,
@@ -228,13 +276,73 @@ const createCase = async (req, res, next) => {
         aiResult.priority,
         aiResult.priority_score,
         aiResult.predicted_delay,
-        judge_id || null
+        judge_id || null,
+        bench || 'Madras High Court - Principal Bench',
+        state || 'Tamil Nadu',
+        district || 'Chennai',
+        court_establishment || 'Principal District & Sessions Court',
+        filing_type || 'Main Case',
+        parseFloat(valuation_amount || 0),
+        advocate_name || null,
+        bar_enrollment_number || null,
+        advocate_phone || null,
+        petitioner_name || null,
+        petitioner_type || 'Individual',
+        parseInt(petitioner_age || 35, 10),
+        petitioner_gender || 'Male',
+        aiPayload.is_senior_citizen,
+        aiPayload.is_differently_abled,
+        aiPayload.is_terminally_ill,
+        petitioner_phone || null,
+        petitioner_email || null,
+        petitioner_address || null,
+        respondent_name || null,
+        respondent_type || 'Individual',
+        respondent_address || null,
+        legal_act || 'Indian Penal Code (IPC)',
+        legal_section || null,
+        police_station || null,
+        fir_number || null,
+        fir_year ? parseInt(fir_year, 10) : null,
+        custody_status || 'N/A',
+        parseInt(detention_days || 0, 10),
+        lower_court_name || null,
+        lower_court_case_number || null,
+        lower_court_order_date || null,
+        caveat_filed === true || caveat_filed === 'true',
+        caveat_number || null,
+        egras_grn_number || null,
+        parseFloat(court_fee_paid || 0),
+        cause_of_action_date || null,
+        cause_of_action_place || null,
+        trial_stage || 'Filing & Scrutiny'
       ]
     );
 
     const newCase = insertRes.rows[0];
 
-    // 3. Write record to predictions table for history
+    // 3. Save any attached eFiling document files
+    if (req.files) {
+      const fileTypes = ['plaint_pdf', 'vakalatnama_pdf', 'impugned_order_pdf', 'file'];
+      for (const fKey of fileTypes) {
+        if (req.files[fKey] && req.files[fKey].length > 0) {
+          const uploadedFile = req.files[fKey][0];
+          await db.query(
+            `INSERT INTO documents (case_id, file_name, file_path, file_type, uploaded_by)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [
+              newCase.id,
+              uploadedFile.originalname,
+              uploadedFile.path,
+              uploadedFile.mimetype || 'application/pdf',
+              req.user.id
+            ]
+          );
+        }
+      }
+    }
+
+    // 4. Write record to predictions table for history
     await db.query(
       `INSERT INTO predictions (case_id, priority, priority_score, predicted_delay, reasons) 
        VALUES ($1, $2, $3, $4, $5)`,
@@ -247,26 +355,23 @@ const createCase = async (req, res, next) => {
       ]
     );
 
-    // 4. Log in Audit logs
+    // 5. Log in Audit logs
     await db.query(
       'INSERT INTO audit_logs (user_id, action, details) VALUES ($1, $2, $3)',
-      [req.user.id, 'Create Case', `Created case ID ${newCase.id} (${case_number}) with initial AI Priority: ${aiResult.priority}`]
+      [req.user.id, 'Register Case', `Registered case ID ${newCase.id} (${case_number}) - Priority: ${aiResult.priority} (${aiResult.priority_score}%)`]
     );
 
-    // 5. Send alerts if High Priority
+    // 6. Send alerts if High Priority
     if (aiResult.priority === 'High') {
       await notificationService.notifyAdmins(
-        `CRITICAL PRIORITY: New High Priority case ${case_number} - "${title}" has been registered.`,
+        `HIGH PRIORITY CASE: Case ${case_number} ("${title}") registered with ${aiResult.priority_score}% Priority Score.`,
         'Priority Alert'
       );
     }
 
-    // 6. Notify assigned judge
+    // 7. Notify assigned judge
     if (judge_id) {
-      const judgeUserRes = await db.query(
-        'SELECT user_id FROM judges WHERE id = $1',
-        [judge_id]
-      );
+      const judgeUserRes = await db.query('SELECT user_id FROM judges WHERE id = $1', [judge_id]);
       if (judgeUserRes.rows.length > 0) {
         await notificationService.sendNotification(
           judgeUserRes.rows[0].user_id,

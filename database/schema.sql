@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS judges (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Cases Table
+-- 3. Cases Table (Expanded with Tamil Nadu eFiling 3.0 & 7-Vector Judicial Matrix)
 CREATE TABLE IF NOT EXISTS cases (
     id SERIAL PRIMARY KEY,
     case_number VARCHAR(50) UNIQUE NOT NULL,
@@ -39,6 +39,62 @@ CREATE TABLE IF NOT EXISTS cases (
     priority_score INTEGER DEFAULT 50 CHECK (priority_score >= 0 AND priority_score <= 100),
     predicted_delay INTEGER DEFAULT 0, -- delay in days
     judge_id INTEGER REFERENCES judges(id) ON DELETE SET NULL,
+
+    -- Tamil Nadu eFiling 3.0 Fields & 7-Vector Metadata
+    bench VARCHAR(100) DEFAULT 'Madras High Court - Principal Bench',
+    state VARCHAR(50) DEFAULT 'Tamil Nadu',
+    district VARCHAR(50) DEFAULT 'Chennai',
+    court_establishment VARCHAR(100) DEFAULT 'Principal District & Sessions Court',
+    filing_type VARCHAR(50) DEFAULT 'Main Case',
+    valuation_amount NUMERIC(15,2) DEFAULT 0,
+
+    -- Advocate Details
+    advocate_name VARCHAR(150),
+    bar_enrollment_number VARCHAR(50), -- e.g. MS/1420/2018
+    advocate_phone VARCHAR(15),
+
+    -- Petitioner Details (Litigant 1) & Vulnerability Metrics (Vector 1)
+    petitioner_name VARCHAR(150),
+    petitioner_type VARCHAR(30) DEFAULT 'Individual',
+    petitioner_age INTEGER DEFAULT 35,
+    petitioner_gender VARCHAR(10) DEFAULT 'Male',
+    is_senior_citizen BOOLEAN DEFAULT FALSE,
+    is_differently_abled BOOLEAN DEFAULT FALSE,
+    is_terminally_ill BOOLEAN DEFAULT FALSE,
+    petitioner_phone VARCHAR(15),
+    petitioner_email VARCHAR(100),
+    petitioner_address TEXT,
+
+    -- Respondent Details (Litigant 2)
+    respondent_name VARCHAR(150),
+    respondent_type VARCHAR(30) DEFAULT 'Individual',
+    respondent_address TEXT,
+
+    -- Legal Acts, Police Station & Custody (Vectors 2 & 3)
+    legal_act VARCHAR(150) DEFAULT 'Indian Penal Code (IPC)',
+    legal_section VARCHAR(100) DEFAULT '302, 34',
+    police_station VARCHAR(100),
+    fir_number VARCHAR(50),
+    fir_year INTEGER,
+    custody_status VARCHAR(40) DEFAULT 'N/A', -- 'In Judicial Custody', 'On Bail', 'Absconding', 'N/A'
+    detention_days INTEGER DEFAULT 0,
+
+    -- Lower Court Details (Appeals / Revisions)
+    lower_court_name VARCHAR(150),
+    lower_court_case_number VARCHAR(50),
+    lower_court_order_date DATE,
+
+    -- Caveat & Court Fee eGRAS Details
+    caveat_filed BOOLEAN DEFAULT FALSE,
+    caveat_number VARCHAR(50),
+    egras_grn_number VARCHAR(50), -- TN eGRAS Payment GRN
+    court_fee_paid NUMERIC(10,2) DEFAULT 0,
+
+    -- Cause of Action & Trial Stage (Vectors 4 & 6)
+    cause_of_action_date DATE,
+    cause_of_action_place VARCHAR(100),
+    trial_stage VARCHAR(50) DEFAULT 'Filing & Scrutiny', -- 'Filing & Scrutiny', 'Framing of Charges', 'Prosecution Evidence', 'Defense Evidence', 'Final Arguments'
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

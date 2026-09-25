@@ -21,13 +21,16 @@ const Login = () => {
       return;
     }
 
+    // Clear stale session items before login attempt
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
     setLocalError('');
     setLoading(true);
     try {
       await login(username, password);
       navigate('/dashboard');
     } catch (err) {
-      // AuthContext handles state, error is also returned
       setLocalError(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
