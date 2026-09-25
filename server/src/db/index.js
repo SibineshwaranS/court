@@ -19,6 +19,7 @@ pool.on('connect', (client) => {
   console.log('PostgreSQL database connected successfully');
   useInMemory = false;
   client.query(`
+    DELETE FROM cases WHERE case_number LIKE 'C-2026-%';
     UPDATE cases SET case_number = 'TN-CRL-2026-0001' WHERE case_number = 'C-2026-0001';
     UPDATE cases SET case_number = 'TN-OS-2026-0002' WHERE case_number = 'C-2026-0002';
     UPDATE cases SET case_number = 'TN-FC-2026-0003' WHERE case_number = 'C-2026-0003';

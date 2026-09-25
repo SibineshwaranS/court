@@ -311,9 +311,14 @@ const Dashboard = () => {
                   <h4 className="text-sm font-bold text-gray-800 dark:text-white mt-1 hover:underline">
                     <Link to={`/cases/${c.id}`}>{c.title}</Link>
                   </h4>
+                  {c.judge_name && (
+                    <p className="text-xs text-gray-500 dark:text-court-300 mt-1">
+                      Presiding: <span className="font-semibold text-gray-700 dark:text-white">{c.judge_name}</span>
+                    </p>
+                  )}
                   <div className="flex justify-between items-center mt-3 text-xs text-gray-500 dark:text-gray-400">
-                    <span>Type: <strong>{c.case_type}</strong></span>
-                    <span>Delay: <strong className="text-red-500">{c.predicted_delay} Days</strong></span>
+                    <span>Bench: <strong>{c.bench ? c.bench.split('-')[0] : c.case_type}</strong></span>
+                    <span>Est Delay: <strong className="text-red-500">~{c.predicted_delay} Days</strong></span>
                   </div>
                 </div>
               ))
