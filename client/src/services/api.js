@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Create Axios Instance targeting Express backend API
+// Create Axios Instance targeting Express backend API on Render
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://court-6lbv.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
