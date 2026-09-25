@@ -4,7 +4,7 @@
  * Usage: node test-api.js [optional_base_url]
  */
 
-const BASE_URL = process.argv[2] || process.env.TEST_URL || 'https://court-6lbv.onrender.com/api';
+const BASE_URL = process.argv[2] || process.env.TEST_URL || 'http://localhost:5000/api';
 
 console.log(`\n======================================================`);
 console.log(`🚀 Starting Full End-to-End API Test Suite`);

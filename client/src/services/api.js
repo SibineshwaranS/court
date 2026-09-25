@@ -299,10 +299,10 @@ const handleClientFallback = (config) => {
   });
 };
 
-// Create Axios Instance targeting Express backend API on Render
+// Create Axios Instance targeting local Express backend API (/api)
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://court-6lbv.onrender.com/api',
-  timeout: 15000,
+  baseURL: import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '/api',
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
