@@ -224,10 +224,9 @@ const Cases = () => {
 
   // Handle Multi-part Case Registration
   const handleCreateSubmit = async (e) => {
-    e.preventDefault();
-    // Do not submit form if user is navigating intermediate steps (1-7)
-    if (currentStep < 8) {
-      setCurrentStep(prev => Math.min(8, prev + 1));
+    if (e) e.preventDefault();
+    // Strictly block form submission unless user has navigated to the final Step 8
+    if (currentStep !== 8) {
       return;
     }
     setModalError('');
@@ -585,7 +584,15 @@ const Cases = () => {
             </div>
 
             {/* Form Content */}
-            <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+            <form 
+              onSubmit={handleCreateSubmit} 
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                  e.preventDefault();
+                }
+              }}
+              className="flex-1 overflow-y-auto p-6 space-y-6"
+            >
               {modalError && (
                 <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
                   {modalError}
