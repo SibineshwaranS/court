@@ -44,12 +44,11 @@ const Navbar = ({ toggleSidebar }) => {
 
   // Fetch Notifications
   const fetchNotifications = async () => {
-    if (!user) return;
+    if (!user || (typeof navigator !== 'undefined' && !navigator.onLine)) return;
     try {
       const response = await api.get('/notifications');
       setNotifications(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
-      console.error('Error fetching notifications:', err);
       setNotifications([]);
     }
   };
