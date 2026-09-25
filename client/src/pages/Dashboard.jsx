@@ -44,14 +44,14 @@ const Dashboard = () => {
         // 2. Fetch hearings scheduled for today
         // Filter by judge if current user is a judge
         const hearingsParams = { date: todayDate };
-        if (user.role === 'Judge' && user.judgeId) {
+        if (user?.role === 'Judge' && user?.judgeId) {
           hearingsParams.judge_id = user.judgeId;
         }
         const hearingsRes = await api.get('/hearings', { params: hearingsParams });
         
         // 3. Fetch cases (first page, limit 5, filter to High priority)
         const casesParams = { priority: 'High', limit: 5 };
-        if (user.role === 'Judge' && user.judgeId) {
+        if (user?.role === 'Judge' && user?.judgeId) {
           casesParams.judge_id = user.judgeId;
         }
         const casesRes = await api.get('/cases', { params: casesParams });

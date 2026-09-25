@@ -183,6 +183,7 @@ const Cases = () => {
 
   // Fetch cases whenever filter inputs or pagination changes
   const fetchCases = async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const params = {
@@ -194,7 +195,7 @@ const Cases = () => {
         limit: 8
       };
       
-      if (user.role === 'Judge' && user.judgeId) {
+      if (user?.role === 'Judge' && user?.judgeId) {
         params.judge_id = user.judgeId;
       }
 
@@ -283,12 +284,12 @@ const Cases = () => {
             </span>
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {user.role === 'Judge' ? 'Roster of assigned cases' : 'Register, filter and manage lawsuit dockets'} &bull; {totalCases} Cases found
+            {user?.role === 'Judge' ? 'Roster of assigned cases' : 'Register, filter and manage lawsuit dockets'} &bull; {totalCases} Cases found
           </p>
         </div>
         
         {/* Register Case button */}
-        {(user.role === 'Administrator' || user.role === 'Court Clerk') && (
+        {(user?.role === 'Administrator' || user?.role === 'Court Clerk') && (
           <button
             onClick={() => { setShowModal(true); setCurrentStep(1); }}
             className="flex items-center gap-2 px-4 py-2.5 bg-court-500 hover:bg-court-400 text-white font-semibold text-sm rounded-xl shadow-md shadow-court-500/10 active:scale-[0.98] transition-all"
@@ -398,7 +399,7 @@ const Cases = () => {
                   <th className="px-6 py-4">Filing Date</th>
                   <th className="px-6 py-4">Presiding Judge</th>
                   <th className="px-6 py-4">Status</th>
-                  {user.role === 'Administrator' && <th className="px-6 py-4 text-right">Actions</th>}
+                  {user?.role === 'Administrator' && <th className="px-6 py-4 text-right">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-court-800 text-sm">
@@ -462,7 +463,7 @@ const Cases = () => {
                         {c.status}
                       </span>
                     </td>
-                    {user.role === 'Administrator' && (
+                    {user?.role === 'Administrator' && (
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => handleDeleteCase(c.id, c.case_number)}

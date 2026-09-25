@@ -74,7 +74,7 @@ const CaseDetail = () => {
         setJudges([]);
       }
     };
-    if (user.role === 'Administrator' || user.role === 'Court Clerk') {
+    if (user?.role === 'Administrator' || user?.role === 'Court Clerk') {
       fetchJudges();
     }
   }, [user]);

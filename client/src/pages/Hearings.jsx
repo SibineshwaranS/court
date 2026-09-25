@@ -48,13 +48,14 @@ const Hearings = () => {
         setJudges([]);
       }
     };
-    if (user.role === 'Administrator' || user.role === 'Court Clerk') {
+    if (user?.role === 'Administrator' || user?.role === 'Court Clerk') {
       fetchJudges();
     }
   }, [user]);
 
   // Fetch hearings
   const fetchHearings = async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const params = {};
@@ -62,7 +63,7 @@ const Hearings = () => {
       if (dateFilter) params.date = dateFilter;
       
       // Auto-restrict roster to judge's assignments if current user is a Judge
-      if (user.role === 'Judge' && user.judgeId) {
+      if (user?.role === 'Judge' && user?.judgeId) {
         params.judge_id = user.judgeId;
       } else if (judgeFilter) {
         params.judge_id = judgeFilter;
