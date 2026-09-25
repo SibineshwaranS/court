@@ -172,9 +172,10 @@ const Cases = () => {
     const fetchJudges = async () => {
       try {
         const res = await api.get('/auth/judges');
-        setJudges(res.data);
+        setJudges(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error('Error fetching judges', err);
+        setJudges([]);
       }
     };
     if (showModal) fetchJudges();
@@ -198,12 +199,13 @@ const Cases = () => {
       }
 
       const res = await api.get('/cases', { params });
-      setCases(res.data.cases);
-      setTotalPages(res.data.meta.pages);
-      setTotalCases(res.data.meta.total);
+      setCases(Array.isArray(res.data?.cases) ? res.data.cases : []);
+      setTotalPages(res.data?.meta?.pages || 1);
+      setTotalCases(res.data?.meta?.total || 0);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching cases:', err);
+      setCases([]);
       setLoading(false);
     }
   };
@@ -396,7 +398,7 @@ const Cases = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-court-800 text-sm">
-                {cases.map((c) => (
+                {(Array.isArray(cases) ? cases : []).map((c) => (
                   <tr 
                     key={c.id} 
                     className="hover:bg-gray-50/50 dark:hover:bg-court-950/25 transition-colors"
@@ -1147,7 +1149,7 @@ const Cases = () => {
                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-court-400 dark:bg-court-950 dark:border-court-800 dark:text-white text-sm"
                       >
                         <option value="">Auto-Allocate Based on Roster</option>
-                        {judges.map(j => (
+                        {(Array.isArray(judges) ? judges : []).map(j => (
                           <option key={j.judge_id} value={j.judge_id}>
                             {j.full_name} ({j.specialization} - {j.courtroom})
                           </option>

@@ -68,9 +68,10 @@ const CaseDetail = () => {
     const fetchJudges = async () => {
       try {
         const res = await api.get('/auth/judges');
-        setJudges(res.data);
+        setJudges(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error('Error fetching judges', err);
+        setJudges([]);
       }
     };
     if (user.role === 'Administrator' || user.role === 'Court Clerk') {
@@ -155,9 +156,10 @@ const CaseDetail = () => {
           judge_id: caseData.judge_id
         }
       });
-      setRecommendations(res.data);
+      setRecommendations(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error fetching scheduler dates', err);
+      setRecommendations([]);
     } finally {
       setLoadingScheduler(false);
     }
@@ -394,7 +396,7 @@ const CaseDetail = () => {
                   className="w-full sm:w-72 px-4 py-2.5 bg-gray-50 border border-gray-250 rounded-xl focus:outline-none focus:border-court-400 dark:bg-court-950 dark:border-court-800 dark:text-white text-sm"
                 >
                   <option value="">Unassigned</option>
-                  {judges.map((j) => (
+                  {(Array.isArray(judges) ? judges : []).map((j) => (
                     <option key={j.judge_id} value={j.judge_id}>
                       {j.full_name} ({j.specialization} - {j.courtroom})
                     </option>
@@ -442,12 +444,12 @@ const CaseDetail = () => {
 
             {/* Uploaded Documents List */}
             <div className="divide-y divide-gray-150 dark:divide-court-850">
-              {caseData.documents?.length === 0 ? (
+              {!Array.isArray(caseData?.documents) || caseData.documents.length === 0 ? (
                 <p className="text-xs text-gray-400 dark:text-court-400 text-center py-6">
                   No document attachments found for this case file.
                 </p>
               ) : (
-                caseData.documents?.map((doc) => (
+                caseData.documents.map((doc) => (
                   <div key={doc.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between text-sm">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-court-50 dark:bg-court-950 text-court-600 dark:text-court-300 rounded-xl">
@@ -580,7 +582,7 @@ const CaseDetail = () => {
               </div>
 
               {/* Scheduled Hearings timeline blocks */}
-              {caseData.hearings?.map((h) => (
+              {(Array.isArray(caseData?.hearings) ? caseData.hearings : []).map((h) => (
                 <div key={h.id} className="relative pl-6">
                   <div className="absolute -left-[9px] top-1.5 w-4.5 h-4.5 rounded-full border-4 border-white bg-indigo-500 dark:border-court-900" />
                   <span className="text-[10px] font-bold text-gray-400 dark:text-court-400 block">
@@ -639,7 +641,7 @@ const CaseDetail = () => {
               ) : (
                 <div className="space-y-4">
                   <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Recommended Slots</span>
-                  {recommendations.length === 0 ? (
+                  {!Array.isArray(recommendations) || recommendations.length === 0 ? (
                     <p className="text-xs text-gray-400 dark:text-court-400">No conflict-free slots found in the next 60 days.</p>
                   ) : (
                     <div className="space-y-3">

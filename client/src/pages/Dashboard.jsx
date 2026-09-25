@@ -57,16 +57,19 @@ const Dashboard = () => {
         const casesRes = await api.get('/cases', { params: casesParams });
 
         // Update states
+        const safeHearings = Array.isArray(hearingsRes.data) ? hearingsRes.data : [];
+        const safePriorityCases = Array.isArray(casesRes.data?.cases) ? casesRes.data.cases : [];
+
         setStats({
-          totalCases: perf.totalCases || 0,
-          pendingCases: perf.statusBreakdown?.pending || 0,
-          disposedCases: perf.statusBreakdown?.disposed || 0,
-          todayHearingsCount: hearingsRes.data.length,
-          highPriorityCount: perf.priorityBreakdown?.high || 0
+          totalCases: perf?.totalCases || 0,
+          pendingCases: perf?.statusBreakdown?.pending || 0,
+          disposedCases: perf?.statusBreakdown?.disposed || 0,
+          todayHearingsCount: safeHearings.length,
+          highPriorityCount: perf?.priorityBreakdown?.high || 0
         });
 
-        setTodayHearings(hearingsRes.data);
-        setPriorityCases(casesRes.data.cases || []);
+        setTodayHearings(safeHearings);
+        setPriorityCases(safePriorityCases);
       } catch (err) {
         console.error('Error fetching dashboard statistics:', err);
       } finally {
@@ -200,7 +203,7 @@ const Dashboard = () => {
           </div>
 
           <div className="flex-1 divide-y divide-gray-100 dark:divide-court-800">
-            {todayHearings.length === 0 ? (
+            {!Array.isArray(todayHearings) || todayHearings.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <span className="text-4xl mb-2">📅</span>
                 <p className="text-sm font-medium text-gray-400 dark:text-court-400">
@@ -284,7 +287,7 @@ const Dashboard = () => {
           </div>
 
           <div className="flex-1 space-y-3">
-            {priorityCases.length === 0 ? (
+            {!Array.isArray(priorityCases) || priorityCases.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <span className="text-4xl mb-2">🛡️</span>
                 <p className="text-sm font-medium text-gray-400 dark:text-court-400">

@@ -42,9 +42,10 @@ const Hearings = () => {
     const fetchJudges = async () => {
       try {
         const res = await api.get('/auth/judges');
-        setJudges(res.data);
+        setJudges(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error('Error fetching judges', err);
+        setJudges([]);
       }
     };
     if (user.role === 'Administrator' || user.role === 'Court Clerk') {
@@ -68,10 +69,11 @@ const Hearings = () => {
       }
 
       const res = await api.get('/hearings', { params });
-      setHearings(res.data);
+      setHearings(Array.isArray(res.data) ? res.data : []);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching hearings:', err);
+      setHearings([]);
       setLoading(false);
     }
   };
@@ -174,7 +176,7 @@ const Hearings = () => {
                 className="bg-transparent focus:outline-none dark:text-white font-medium text-xs pr-2"
               >
                 <option value="">All Judges</option>
-                {judges.map(j => (
+                {(Array.isArray(judges) ? judges : []).map(j => (
                   <option key={j.judge_id} value={j.judge_id}>
                     {j.full_name}
                   </option>
@@ -227,7 +229,7 @@ const Hearings = () => {
           <div className="col-span-full flex justify-center items-center py-24">
             <div className="w-10 h-10 border-4 border-court-200 border-t-court-600 rounded-full animate-spin"></div>
           </div>
-        ) : hearings.length === 0 ? (
+        ) : !Array.isArray(hearings) || hearings.length === 0 ? (
           <div className="col-span-full bg-white border border-gray-200 rounded-3xl py-20 text-center dark:bg-court-900 dark:border-court-800">
             <span className="text-5xl mb-4 block">📅</span>
             <h3 className="font-outfit font-bold text-lg text-gray-700 dark:text-court-300">
