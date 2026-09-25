@@ -52,9 +52,9 @@ const Analytics = () => {
         ]);
 
         setPriorityData(priorityRes.data);
-        setWorkloadData(workloadRes.data);
-        setMonthlyData(monthlyRes.data);
-        setAgeData(ageRes.data);
+        setWorkloadData(Array.isArray(workloadRes.data) ? workloadRes.data : []);
+        setMonthlyData(Array.isArray(monthlyRes.data) ? monthlyRes.data : []);
+        setAgeData(Array.isArray(ageRes.data) ? ageRes.data : []);
 
         setLoading(false);
       } catch (err) {
@@ -92,19 +92,20 @@ const Analytics = () => {
   };
 
   // --- 2. Judge Workload Chart Configuration ---
-  const workloadLabels = workloadData.map(w => w.name);
+  const safeWorkloadData = Array.isArray(workloadData) ? workloadData : [];
+  const workloadLabels = safeWorkloadData.map(w => w.name);
   const workloadChartConfig = {
     labels: workloadLabels,
     datasets: [
       {
         label: 'Pending Registry',
-        data: workloadData.map(w => parseInt(w.pending, 10)),
+        data: safeWorkloadData.map(w => parseInt(w.pending, 10)),
         backgroundColor: 'rgba(245, 158, 11, 0.75)',
         borderRadius: 6,
       },
       {
         label: 'Active Hearings',
-        data: workloadData.map(w => parseInt(w.active_hearing, 10)),
+        data: safeWorkloadData.map(w => parseInt(w.active_hearing, 10)),
         backgroundColor: 'rgba(59, 130, 246, 0.75)',
         borderRadius: 6,
       }
@@ -112,7 +113,8 @@ const Analytics = () => {
   };
 
   // --- 3. Monthly Registration Filings Chart ---
-  const monthlyLabels = monthlyData.map(m => {
+  const safeMonthlyData = Array.isArray(monthlyData) ? monthlyData : [];
+  const monthlyLabels = safeMonthlyData.map(m => {
     const d = new Date(m.month + '-02'); // Offset timezone
     return d.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
   });
@@ -121,7 +123,7 @@ const Analytics = () => {
     datasets: [
       {
         label: 'New Lawsuits Registered',
-        data: monthlyData.map(m => parseInt(m.count, 10)),
+        data: safeMonthlyData.map(m => parseInt(m.count, 10)),
         borderColor: '#3c6395',
         backgroundColor: 'rgba(60, 99, 149, 0.15)',
         fill: true,
@@ -133,12 +135,13 @@ const Analytics = () => {
   };
 
   // --- 4. Pending Cases Age Distribution Chart ---
-  const ageLabels = ageData.map(a => a.age_bracket);
+  const safeAgeData = Array.isArray(ageData) ? ageData : [];
+  const ageLabels = safeAgeData.map(a => a.age_bracket);
   const ageChartConfig = {
     labels: ageLabels,
     datasets: [
       {
-        data: ageData.map(a => parseInt(a.count, 10)),
+        data: safeAgeData.map(a => parseInt(a.count, 10)),
         backgroundColor: [
           'rgba(59, 130, 246, 0.75)',
           'rgba(99, 102, 241, 0.75)',

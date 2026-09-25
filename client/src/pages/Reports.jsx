@@ -66,12 +66,12 @@ const Reports = () => {
 
     if (activeTab === 'judge') {
       headers = ['Judge ID', 'Judge Name', 'Specialization', 'Courtroom', 'Total Assigned', 'Pending', 'Active Hearings', 'Disposed', 'Avg Delay (Days)', 'Hearings Scheduled'];
-      rows = reportData.map(j => [
+      rows = (Array.isArray(reportData) ? reportData : []).map(j => [
         j.judge_id, j.judge_name, j.specialization, j.courtroom, j.total_cases_assigned, j.pending_cases, j.active_hearings, j.disposed_cases, j.avg_predicted_delay, j.total_hearings_scheduled
       ]);
     } else if (activeTab === 'delay') {
       headers = ['Prioritization Factor / Reason', 'Frequency Count'];
-      rows = reportData.map(r => [r.reason, r.count]);
+      rows = (Array.isArray(reportData) ? reportData : []).map(r => [r.reason, r.count]);
     } else if (activeTab === 'daily') {
       headers = ['Report Date', 'Cases Filed Count', 'Hearings Scheduled Count', 'Total Disposed Count'];
       rows = [[reportData.reportDate, reportData.casesFiledCount, reportData.hearingsCount, reportData.disposedCount]];
@@ -260,7 +260,7 @@ const Reports = () => {
                 {/* Hearings List */}
                 <div className="space-y-3">
                   <h4 className="font-bold text-sm text-gray-800 dark:text-white uppercase tracking-wider">Scheduled Hearings list</h4>
-                  {reportData.hearings.length === 0 ? (
+                  {!Array.isArray(reportData?.hearings) || reportData.hearings.length === 0 ? (
                     <p className="text-xs text-gray-400 italic">No hearings scheduled on this date.</p>
                   ) : (
                     <div className="border border-gray-150 rounded-2xl overflow-hidden dark:border-court-850">
@@ -314,7 +314,7 @@ const Reports = () => {
 
                 <div className="space-y-3">
                   <h4 className="font-bold text-sm text-gray-800 dark:text-white uppercase tracking-wider">Cases Ingested Registry</h4>
-                  {reportData.casesFiled.length === 0 ? (
+                  {!Array.isArray(reportData?.casesFiled) || reportData.casesFiled.length === 0 ? (
                     <p className="text-xs text-gray-400 italic">No cases filed during this month.</p>
                   ) : (
                     <div className="border border-gray-150 rounded-2xl overflow-hidden dark:border-court-850">
@@ -364,7 +364,7 @@ const Reports = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-150 dark:divide-court-850">
-                    {reportData.map((j) => (
+                    {(Array.isArray(reportData) ? reportData : []).map((j) => (
                       <tr key={j.judge_id} className="hover:bg-gray-50/50 dark:hover:bg-court-950/25">
                         <td className="px-6 py-4 font-bold">{j.judge_name}</td>
                         <td className="px-6 py-4">{j.specialization}</td>
@@ -461,7 +461,7 @@ const Reports = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-150 dark:divide-court-850 text-sm">
-                      {reportData.map((r, i) => (
+                      {(Array.isArray(reportData) ? reportData : []).map((r, i) => (
                         <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-court-950/25">
                           <td className="px-6 py-4 font-semibold flex items-center gap-2">
                             <AlertTriangle size={14} className="text-amber-500 shrink-0" />

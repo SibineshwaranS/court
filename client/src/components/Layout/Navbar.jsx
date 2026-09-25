@@ -47,9 +47,10 @@ const Navbar = ({ toggleSidebar }) => {
     if (!user) return;
     try {
       const response = await api.get('/notifications');
-      setNotifications(response.data);
+      setNotifications(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Error fetching notifications:', err);
+      setNotifications([]);
     }
   };
 
@@ -76,14 +77,15 @@ const Navbar = ({ toggleSidebar }) => {
       await api.put(`/notifications/${id}/read`);
       // Update local state
       setNotifications(prev => 
-        prev.map(n => n.id === id ? { ...n, status: 'Read' } : n)
+        (Array.isArray(prev) ? prev : []).map(n => n.id === id ? { ...n, status: 'Read' } : n)
       );
     } catch (err) {
       console.error('Error marking notification read:', err);
     }
   };
 
-  const unreadCount = notifications.filter(n => n.status !== 'Read').length;
+  const safeNotifications = Array.isArray(notifications) ? notifications : [];
+  const unreadCount = safeNotifications.filter(n => n?.status !== 'Read').length;
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 dark:bg-court-950 dark:border-court-800 transition-colors duration-200">
@@ -145,12 +147,12 @@ const Navbar = ({ toggleSidebar }) => {
                 )}
               </div>
               <div className="max-h-64 overflow-y-auto divide-y divide-gray-50 dark:divide-court-800">
-                {notifications.length === 0 ? (
+                {safeNotifications.length === 0 ? (
                   <div className="px-4 py-6 text-center text-sm text-gray-400 dark:text-court-400">
                     No notifications found
                   </div>
                 ) : (
-                  notifications.map((notif) => (
+                  safeNotifications.map((notif) => (
                     <div 
                       key={notif.id}
                       onClick={() => notif.status !== 'Read' && markRead(notif.id)}

@@ -47,7 +47,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     }
   ];
 
-  const filteredLinks = links.filter(link => user && link.roles.includes(user.role));
+  const safeLinks = Array.isArray(links) ? links : [];
+  const filteredLinks = safeLinks.filter(link => user && link.roles && link.roles.includes(user.role));
 
   return (
     <>
