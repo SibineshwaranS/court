@@ -82,7 +82,36 @@ const mockData = {
       custody_status: 'N/A'
     }
   ],
-  hearings: [],
+  hearings: [
+    {
+      id: 1,
+      case_id: 1,
+      judge_id: 1,
+      hearing_date: new Date().toISOString().split('T')[0] + ' 10:30:00',
+      courtroom: 'Courtroom 101',
+      purpose: 'Framing of Charges / Bail Hearing',
+      status: 'Scheduled',
+      comments: 'High priority trial session.',
+      case_number: 'TN-2026-0001',
+      case_title: 'State vs. Rakesh Kumar',
+      case_priority: 'High',
+      judge_name: 'Hon\'ble Judge Rajesh Sharma'
+    },
+    {
+      id: 2,
+      case_id: 2,
+      judge_id: 2,
+      hearing_date: new Date().toISOString().split('T')[0] + ' 11:45:00',
+      courtroom: 'Courtroom 102',
+      purpose: 'Senior Citizen Property Injunction Argument',
+      status: 'Scheduled',
+      comments: 'Urgent stay application.',
+      case_number: 'TN-2026-0002',
+      case_title: 'Saraswathi Ammal vs. City Property Ltd',
+      case_priority: 'High',
+      judge_name: 'Hon\'ble Judge Sneha Patel'
+    }
+  ],
   predictions: [],
   documents: [],
   audit_logs: [],
@@ -183,8 +212,31 @@ function handleInMemoryQuery(text, params = []) {
       return { rows: Object.keys(counts).map(p => ({ priority: p, count: counts[p] })) };
     }
 
-    // Default list query
-    let rows = mockData.cases.map(c => {
+    // Default list query with filter support
+    let filteredCases = [...mockData.cases];
+
+    if (lowerSql.includes('c.priority =') || lowerSql.includes('priority =')) {
+      const priorityParam = params.find(p => ['High', 'Medium', 'Low'].includes(p));
+      if (priorityParam) {
+        filteredCases = filteredCases.filter(c => c.priority === priorityParam);
+      }
+    }
+
+    if (lowerSql.includes('c.status =') || lowerSql.includes('status =')) {
+      const statusParam = params.find(p => ['Pending', 'Hearing', 'Disposed'].includes(p));
+      if (statusParam) {
+        filteredCases = filteredCases.filter(c => c.status === statusParam);
+      }
+    }
+
+    if (lowerSql.includes('c.judge_id =') || lowerSql.includes('judge_id =')) {
+      const jIdParam = params.find(p => typeof p === 'number' && !isNaN(p));
+      if (jIdParam) {
+        filteredCases = filteredCases.filter(c => c.judge_id === jIdParam);
+      }
+    }
+
+    let rows = filteredCases.map(c => {
       const jFound = mockData.judges.find(j => j.id === c.judge_id);
       const uFound = jFound ? mockData.users.find(u => u.id === jFound.user_id) : null;
       return {
@@ -205,7 +257,24 @@ function handleInMemoryQuery(text, params = []) {
 
   // 5. SELECT hearings
   if (lowerSql.includes('hearings') && lowerSql.includes('select')) {
-    return { rows: mockData.hearings };
+    let list = mockData.hearings.map(h => {
+      const cFound = mockData.cases.find(c => c.id === h.case_id);
+      const jFound = mockData.judges.find(j => j.id === h.judge_id);
+      const uFound = jFound ? mockData.users.find(u => u.id === jFound.user_id) : null;
+      return {
+        ...h,
+        case_number: h.case_number || (cFound ? cFound.case_number : 'TN-2026-0001'),
+        case_title: h.case_title || (cFound ? cFound.title : 'Judicial Docket'),
+        case_priority: h.case_priority || (cFound ? cFound.priority : 'Normal'),
+        judge_name: h.judge_name || (uFound ? uFound.full_name : 'Hon\'ble Judge')
+      };
+    });
+
+    if (lowerSql.includes('judge_id =')) {
+      const jId = params.find(p => typeof p === 'number' && !isNaN(p));
+      if (jId) list = list.filter(h => h.judge_id === jId);
+    }
+    return { rows: list };
   }
 
   // 6. SELECT predictions

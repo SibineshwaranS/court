@@ -584,15 +584,7 @@ const Cases = () => {
             </div>
 
             {/* Form Content */}
-            <form 
-              onSubmit={handleCreateSubmit} 
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                  e.preventDefault();
-                }
-              }}
-              className="flex-1 overflow-y-auto p-6 space-y-6"
-            >
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {modalError && (
                 <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
                   {modalError}
@@ -1262,7 +1254,8 @@ const Cases = () => {
                     </button>
                   ) : (
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleCreateSubmit}
                       disabled={submitting}
                       className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-extrabold shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-50"
                     >
@@ -1271,7 +1264,7 @@ const Cases = () => {
                   )}
                 </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
