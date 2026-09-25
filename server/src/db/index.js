@@ -80,6 +80,24 @@ const mockData = {
       is_terminally_ill: true,
       respondent_name: 'City Property Ltd',
       custody_status: 'N/A'
+    },
+    {
+      id: 3,
+      case_number: 'TN-2026-0003',
+      title: 'Union of India vs. Apex Cyber Sol',
+      description: 'Commercial contract dispute & cyber breach suit.',
+      case_type: 'Commercial',
+      status: 'Hearing',
+      filing_date: '2026-03-01',
+      priority: 'High',
+      priority_score: 92,
+      predicted_delay: 15,
+      judge_id: 3,
+      bench: 'District & Sessions Courts of Tamil Nadu',
+      district: 'Chennai',
+      petitioner_name: 'Union of India',
+      respondent_name: 'Apex Cyber Sol',
+      custody_status: 'N/A'
     }
   ],
   hearings: [
@@ -212,25 +230,25 @@ function handleInMemoryQuery(text, params = []) {
       return { rows: Object.keys(counts).map(p => ({ priority: p, count: counts[p] })) };
     }
 
-    // Default list query with filter support
+    // Default list query with strict WHERE clause filter support
     let filteredCases = [...mockData.cases];
 
-    if (lowerSql.includes('c.priority =') || lowerSql.includes('priority =')) {
+    if (lowerSql.includes('and c.priority =') || lowerSql.includes('where c.priority =')) {
       const priorityParam = params.find(p => ['High', 'Medium', 'Low'].includes(p));
       if (priorityParam) {
         filteredCases = filteredCases.filter(c => c.priority === priorityParam);
       }
     }
 
-    if (lowerSql.includes('c.status =') || lowerSql.includes('status =')) {
+    if (lowerSql.includes('and c.status =') || lowerSql.includes('where c.status =')) {
       const statusParam = params.find(p => ['Pending', 'Hearing', 'Disposed'].includes(p));
       if (statusParam) {
         filteredCases = filteredCases.filter(c => c.status === statusParam);
       }
     }
 
-    if (lowerSql.includes('c.judge_id =') || lowerSql.includes('judge_id =')) {
-      const jIdParam = params.find(p => typeof p === 'number' && !isNaN(p));
+    if (lowerSql.includes('and c.judge_id =') || lowerSql.includes('where c.judge_id =')) {
+      const jIdParam = params.find(p => typeof p === 'number' && !isNaN(p) && p !== 8 && p !== 5 && p !== 10);
       if (jIdParam) {
         filteredCases = filteredCases.filter(c => c.judge_id === jIdParam);
       }
@@ -270,7 +288,7 @@ function handleInMemoryQuery(text, params = []) {
       };
     });
 
-    if (lowerSql.includes('judge_id =')) {
+    if (lowerSql.includes('and h.judge_id =') || lowerSql.includes('where h.judge_id =')) {
       const jId = params.find(p => typeof p === 'number' && !isNaN(p));
       if (jId) list = list.filter(h => h.judge_id === jId);
     }
