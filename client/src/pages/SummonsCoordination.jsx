@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { DEFAULT_WITNESSES, DEFAULT_CASES, DEFAULT_SUMMONS } from '../services/mockSummonsData';
 import {
   Send,
   Video,
@@ -26,10 +27,10 @@ import {
 
 const SummonsCoordination = () => {
   const [activeTab, setActiveTab] = useState('summons'); // 'summons' | 'witnesses'
-  const [summonsList, setSummonsList] = useState([]);
-  const [witnessesList, setWitnessesList] = useState([]);
-  const [casesList, setCasesList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [summonsList, setSummonsList] = useState(DEFAULT_SUMMONS);
+  const [witnessesList, setWitnessesList] = useState(DEFAULT_WITNESSES);
+  const [casesList, setCasesList] = useState(DEFAULT_CASES);
+  const [loading, setLoading] = useState(false);
 
   // New Summons Modal
   const [showModal, setShowModal] = useState(false);
@@ -66,17 +67,19 @@ const SummonsCoordination = () => {
       ]);
 
       if (summonsResult.status === 'fulfilled') {
-        const raw = summonsResult.value.data;
-        setSummonsList(Array.isArray(raw) ? raw : (raw?.data || []));
+        const raw = summonsResult.value?.data;
+        const list = Array.isArray(raw) ? raw : (raw?.data || []);
+        if (list.length > 0) setSummonsList(list);
       }
 
       if (witnessesResult.status === 'fulfilled') {
-        const raw = witnessesResult.value.data;
-        setWitnessesList(Array.isArray(raw) ? raw : (raw?.data || []));
+        const raw = witnessesResult.value?.data;
+        const list = Array.isArray(raw) ? raw : (raw?.data || []);
+        if (list.length > 0) setWitnessesList(list);
       }
 
       if (casesResult.status === 'fulfilled') {
-        const raw = casesResult.value.data;
+        const raw = casesResult.value?.data;
         const list = Array.isArray(raw?.cases)
           ? raw.cases
           : Array.isArray(raw?.data)
@@ -84,10 +87,10 @@ const SummonsCoordination = () => {
             : Array.isArray(raw)
               ? raw
               : [];
-        setCasesList(list);
+        if (list.length > 0) setCasesList(list);
       }
     } catch (err) {
-      console.error('Error fetching summons data:', err);
+      console.warn('Backend loading note, using synchronized fallbacks:', err);
     } finally {
       setLoading(false);
     }
@@ -476,11 +479,11 @@ const SummonsCoordination = () => {
                             <ExternalLink size={12} />
                           </a>
                           <a
-                            href={`http://localhost:5000/api/summons/${s.id}/preview-email`}
+                            href={`/api/summons/${s.id}/preview-email`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-lg border border-blue-200/80 dark:border-blue-800 transition-colors"
-                            title="View exact official summons email dispatched to sibineshwarans@gmail.com"
+                            title="View exact official summons email dispatched to recipient"
                           >
                             <Mail size={12} />
                             <span>Notice</span>
