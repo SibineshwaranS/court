@@ -1,0 +1,86 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9;
+         font-size: 13px; color: #1e293b; }
+  .topbar { background: #1e3a5f; color: white; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; }
+  .topbar .logo {{ font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }}
+  .topbar .user  {{ font-size: 12px; opacity: 0.9; }}
+  .sidebar {{ width: 200px; background: #1e3a5f; min-height: calc(100vh - 44px);
+              position: fixed; top: 44px; left: 0; padding: 16px 0; }}
+  .sidebar a {{ display: block; color: rgba(255,255,255,0.75); padding: 10px 20px;
+                font-size: 12px; text-decoration: none; border-left: 3px solid transparent; }}
+  .sidebar a.active {{ color: white; background: rgba(255,255,255,0.1);
+                       border-left: 3px solid #60a5fa; }}
+  .main {{ margin-left: 200px; padding: 20px; }}
+  .card {{ background: white; border-radius: 8px; padding: 16px;
+           box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; }}
+  .card-title {{ font-size: 11px; color: #64748b; text-transform: uppercase;
+                 letter-spacing: 0.5px; margin-bottom: 6px; }}
+  .card-value {{ font-size: 26px; font-weight: 700; color: #1e3a5f; }}
+  .grid {{ display: grid; gap: 14px; }}
+  .grid-4 {{ grid-template-columns: repeat(4, 1fr); }}
+  .grid-3 {{ grid-template-columns: repeat(3, 1fr); }}
+  .grid-2 {{ grid-template-columns: repeat(2, 1fr); }}
+  .badge {{ display: inline-block; padding: 2px 8px; border-radius: 12px;
+            font-size: 10px; font-weight: 600; }}
+  .badge-high   {{ background: #fee2e2; color: #dc2626; }}
+  .badge-medium {{ background: #fef3c7; color: #d97706; }}
+  .badge-low    {{ background: #dcfce7; color: #16a34a; }}
+  .badge-pending   {{ background: #e0f2fe; color: #0369a1; }}
+  .badge-hearing   {{ background: #fef9c3; color: #a16207; }}
+  .badge-disposed  {{ background: #dcfce7; color: #15803d; }}
+  table {{ width: 100%; border-collapse: collapse; font-size: 11px; }}
+  th {{ background: #1e3a5f; color: white; padding: 8px 10px; text-align: left; font-size: 10px; }}
+  td {{ padding: 7px 10px; border-bottom: 1px solid #e2e8f0; }}
+  tr:nth-child(even) td {{ background: #f8fafc; }}
+  .btn {{ padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
+          font-size: 11px; font-weight: 600; }}
+  .btn-primary {{ background: #1e3a5f; color: white; }}
+  .btn-success {{ background: #16a34a; color: white; }}
+  .section-title {{ font-size: 16px; font-weight: 700; color: #1e3a5f; margin-bottom: 14px; }}
+  .form-label {{ font-size: 11px; color: #475569; margin-bottom: 4px; display: block; font-weight: 500; }}
+  .form-input {{ width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px;
+                 font-size: 12px; color: #1e293b; background: white; }}
+  .form-group {{ margin-bottom: 12px; }}
+  .tab {{ padding: 8px 16px; font-size: 11px; font-weight: 600; cursor: pointer;
+          border-bottom: 2px solid transparent; color: #64748b; display: inline-block; }}
+  .tab.active {{ color: #1e3a5f; border-bottom: 2px solid #1e3a5f; }}
+  .progress-bar {{ height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }}
+  .progress-fill {{ height: 100%; border-radius: 3px; }}
+  .avatar {{ width: 32px; height: 32px; border-radius: 50%; background: #60a5fa;
+             color: white; display: flex; align-items: center; justify-content: center;
+             font-size: 13px; font-weight: 700; }}
+</style>
+</head><body>
+
+    <div class="topbar">
+      <div class="logo">⚖️ AI Court System &nbsp;|&nbsp; <span style="font-weight:300;font-size:13px">Smart India Hackathon SIH1280</span></div>
+      <div class="user">🔔 &nbsp; 👤 Admin &nbsp; | &nbsp; Logout</div>
+    </div>
+    
+<div class="sidebar"><a href="#" class="">🏠 Dashboard</a><a href="#" class="active">📁 Case Management</a><a href="#" class="">📅 Hearings</a><a href="#" class="">📊 Analytics</a><a href="#" class="">📄 Reports</a></div>
+<div class="main">
+  <div class="section-title">📝 Register New Case — Tamil Nadu eFiling 3.0</div>
+  <div class="card" style="margin-bottom:10px">
+    <div style="border-bottom:1px solid #e2e8f0;margin-bottom:14px;padding-bottom:8px;display:flex;gap:0">
+      <span class="tab active">Case Details</span><span class="tab">Litigant Details</span><span class="tab">Legal Details</span><span class="tab">Documents</span>
+    </div>
+    <div class="grid grid-3">
+      <div class="form-group"><label class="form-label">Bench / Court *</label><select class="form-input"><option>Madras High Court — Principal Bench</option></select></div>
+      <div class="form-group"><label class="form-label">Case Number *</label><input class="form-input" value="C-2026-9999" /></div>
+      <div class="form-group"><label class="form-label">Case Type *</label><select class="form-input"><option>Criminal</option><option>Civil</option></select></div>
+      <div class="form-group"><label class="form-label">Filing Type</label><select class="form-input"><option>Main Case</option><option>Bail Application</option><option>Miscellaneous</option></select></div>
+      <div class="form-group"><label class="form-label">Filing Date *</label><input class="form-input" type="date" value="2026-10-12" /></div>
+      <div class="form-group"><label class="form-label">Subject Valuation (₹)</label><input class="form-input" value="0" /></div>
+    </div>
+    <div class="form-group"><label class="form-label">Case Title *</label><input class="form-input" value="State vs. Vikram Malhotra (Senior Citizen Theft)" /></div>
+    <div class="form-group"><label class="form-label">Case Description / Facts</label><textarea class="form-input" rows="3">Accused committed theft of commercial goods. Case involves a senior citizen victim (age 73) requiring urgent settlement. Victim is differently-abled and has filed a compensation claim.</textarea></div>
+    <div class="form-group"><label class="form-label">Presiding Judge</label><select class="form-input"><option>Hon'ble Judge Rajesh Sharma – Criminal – Courtroom 101</option></select></div>
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn btn-primary">🤖 Register & Run AI Prioritization</button>
+      <button class="btn" style="background:#e2e8f0">Cancel</button>
+    </div>
+  </div>
+</div></body></html>

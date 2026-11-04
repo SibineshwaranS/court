@@ -1,0 +1,97 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9;
+         font-size: 13px; color: #1e293b; }
+  .topbar { background: #1e3a5f; color: white; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; }
+  .topbar .logo {{ font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }}
+  .topbar .user  {{ font-size: 12px; opacity: 0.9; }}
+  .sidebar {{ width: 200px; background: #1e3a5f; min-height: calc(100vh - 44px);
+              position: fixed; top: 44px; left: 0; padding: 16px 0; }}
+  .sidebar a {{ display: block; color: rgba(255,255,255,0.75); padding: 10px 20px;
+                font-size: 12px; text-decoration: none; border-left: 3px solid transparent; }}
+  .sidebar a.active {{ color: white; background: rgba(255,255,255,0.1);
+                       border-left: 3px solid #60a5fa; }}
+  .main {{ margin-left: 200px; padding: 20px; }}
+  .card {{ background: white; border-radius: 8px; padding: 16px;
+           box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; }}
+  .card-title {{ font-size: 11px; color: #64748b; text-transform: uppercase;
+                 letter-spacing: 0.5px; margin-bottom: 6px; }}
+  .card-value {{ font-size: 26px; font-weight: 700; color: #1e3a5f; }}
+  .grid {{ display: grid; gap: 14px; }}
+  .grid-4 {{ grid-template-columns: repeat(4, 1fr); }}
+  .grid-3 {{ grid-template-columns: repeat(3, 1fr); }}
+  .grid-2 {{ grid-template-columns: repeat(2, 1fr); }}
+  .badge {{ display: inline-block; padding: 2px 8px; border-radius: 12px;
+            font-size: 10px; font-weight: 600; }}
+  .badge-high   {{ background: #fee2e2; color: #dc2626; }}
+  .badge-medium {{ background: #fef3c7; color: #d97706; }}
+  .badge-low    {{ background: #dcfce7; color: #16a34a; }}
+  .badge-pending   {{ background: #e0f2fe; color: #0369a1; }}
+  .badge-hearing   {{ background: #fef9c3; color: #a16207; }}
+  .badge-disposed  {{ background: #dcfce7; color: #15803d; }}
+  table {{ width: 100%; border-collapse: collapse; font-size: 11px; }}
+  th {{ background: #1e3a5f; color: white; padding: 8px 10px; text-align: left; font-size: 10px; }}
+  td {{ padding: 7px 10px; border-bottom: 1px solid #e2e8f0; }}
+  tr:nth-child(even) td {{ background: #f8fafc; }}
+  .btn {{ padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
+          font-size: 11px; font-weight: 600; }}
+  .btn-primary {{ background: #1e3a5f; color: white; }}
+  .btn-success {{ background: #16a34a; color: white; }}
+  .section-title {{ font-size: 16px; font-weight: 700; color: #1e3a5f; margin-bottom: 14px; }}
+  .form-label {{ font-size: 11px; color: #475569; margin-bottom: 4px; display: block; font-weight: 500; }}
+  .form-input {{ width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px;
+                 font-size: 12px; color: #1e293b; background: white; }}
+  .form-group {{ margin-bottom: 12px; }}
+  .tab {{ padding: 8px 16px; font-size: 11px; font-weight: 600; cursor: pointer;
+          border-bottom: 2px solid transparent; color: #64748b; display: inline-block; }}
+  .tab.active {{ color: #1e3a5f; border-bottom: 2px solid #1e3a5f; }}
+  .progress-bar {{ height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }}
+  .progress-fill {{ height: 100%; border-radius: 3px; }}
+  .avatar {{ width: 32px; height: 32px; border-radius: 50%; background: #60a5fa;
+             color: white; display: flex; align-items: center; justify-content: center;
+             font-size: 13px; font-weight: 700; }}
+</style>
+</head><body>
+
+    <div class="topbar">
+      <div class="logo">⚖️ AI Court System &nbsp;|&nbsp; <span style="font-weight:300;font-size:13px">Smart India Hackathon SIH1280</span></div>
+      <div class="user">🔔 &nbsp; 👤 Admin &nbsp; | &nbsp; Logout</div>
+    </div>
+    
+<div class="sidebar"><a href="#" class="">🏠 Dashboard</a><a href="#" class="active">📁 Case Management</a><a href="#" class="">📅 Hearings</a><a href="#" class="">📊 Analytics</a><a href="#" class="">📄 Reports</a></div>
+<div class="main">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div class="section-title" style="margin-bottom:0">📁 Case Management Registry</div>
+    <button class="btn btn-primary">+ Register New Case</button>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <input class="form-input" style="width:220px" placeholder="🔍 Search case no. or title..." value="">
+      <select class="form-input" style="width:130px"><option>All Status</option><option>Pending</option><option>Hearing</option><option>Disposed</option></select>
+      <select class="form-input" style="width:130px"><option>All Priority</option><option>High</option><option>Medium</option><option>Low</option></select>
+      <select class="form-input" style="width:140px"><option>All Types</option><option>Criminal</option><option>Civil</option><option>Family</option></select>
+      <button class="btn btn-primary">Apply Filters</button>
+    </div>
+  </div>
+  <div class="card">
+    <table>
+      <tr><th>Case No.</th><th>Title</th><th>Type</th><th>Status</th><th>Priority</th><th>AI Score</th><th>Pred. Delay</th><th>Judge</th><th>Filed</th><th>Actions</th></tr>
+      <tr><td><b>C-2026-0001</b></td><td>State vs. Rakesh Kumar</td><td>Criminal</td><td><span class="badge badge-pending">Pending</span></td><td><span class="badge badge-high">High</span></td><td>85</td><td>45 days</td><td>Hon. Sharma</td><td>10 Jan 2026</td><td><button class="btn btn-primary" style="font-size:9px;padding:3px 8px">View</button></td></tr>
+      <tr><td><b>C-2026-0002</b></td><td>Meena Devi vs. State (DV)</td><td>Family</td><td><span class="badge badge-hearing">Hearing</span></td><td><span class="badge badge-high">High</span></td><td>88</td><td>9 days</td><td>Hon. Iyer</td><td>15 Jan 2026</td><td><button class="btn btn-primary" style="font-size:9px;padding:3px 8px">View</button></td></tr>
+      <tr><td><b>C-2026-0003</b></td><td>ABC Corp vs. XYZ Ltd</td><td>Commercial</td><td><span class="badge badge-pending">Pending</span></td><td><span class="badge badge-medium">Medium</span></td><td>62</td><td>55 days</td><td>Hon. Nair</td><td>20 Jan 2026</td><td><button class="btn btn-primary" style="font-size:9px;padding:3px 8px">View</button></td></tr>
+      <tr><td><b>C-2026-0004</b></td><td>Suresh Kumar Bail Application</td><td>Criminal</td><td><span class="badge badge-hearing">Hearing</span></td><td><span class="badge badge-high">High</span></td><td>91</td><td>7 days</td><td>Hon. Babu</td><td>05 Feb 2026</td><td><button class="btn btn-primary" style="font-size:9px;padding:3px 8px">View</button></td></tr>
+      <tr><td><b>C-2026-0005</b></td><td>Property Dispute – Rajan vs. Murugan</td><td>Civil</td><td><span class="badge badge-disposed">Disposed</span></td><td><span class="badge badge-low">Low</span></td><td>38</td><td>90 days</td><td>Hon. Sharma</td><td>12 Feb 2026</td><td><button class="btn btn-primary" style="font-size:9px;padding:3px 8px">View</button></td></tr>
+      <tr><td><b>C-2026-0006</b></td><td>POCSO Case – State vs. Anand</td><td>Criminal</td><td><span class="badge badge-hearing">Hearing</span></td><td><span class="badge badge-high">High</span></td><td>95</td><td>7 days</td><td>Hon. Iyer</td><td>18 Feb 2026</td><td><button class="btn btn-primary" style="font-size:9px;padding:3px 8px">View</button></td></tr>
+      <tr><td><b>C-2026-0007</b></td><td>Pension Dispute – Aged 78yr Petitioner</td><td>Civil</td><td><span class="badge badge-pending">Pending</span></td><td><span class="badge badge-high">High</span></td><td>78</td><td>14 days</td><td>—</td><td>22 Feb 2026</td><td><button class="btn btn-primary" style="font-size:9px;padding:3px 8px">View</button></td></tr>
+    </table>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:11px;color:#64748b">
+      <span>Showing 7 of 247 cases</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn" style="background:#e2e8f0;font-size:10px;padding:4px 10px">← Prev</button>
+        <button class="btn btn-primary" style="font-size:10px;padding:4px 10px">Next →</button>
+      </div>
+    </div>
+  </div>
+</div></body></html>
