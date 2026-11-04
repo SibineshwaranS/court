@@ -8,10 +8,11 @@ A production-ready full-stack judicial case management portal for Smart India Ha
 
 District courts face severe backlog delays due to manual tracking, inefficient hearing scheduling, and lacking analytical urgency benchmarks. This portal:
 1. **Digitizes case management records** (CRUD, legal attachments).
-2. **Predicts litigation priority** using an external AI Agent.
-3. **Predicts average hearing delays** using an external AI Agent.
-4. **Recommends conflict-free hearing dates** via a Smart Scheduler.
-5. **Provides visual analytics dashboards & printable reports** for judges and administrators.
+2. **7-Vector Judicial Prioritization Matrix**: Weights statutory urgency, vulnerability (Senior Citizen, PwD, Terminally Ill), detention duration, and public stake.
+3. **Smart Summons & Virtual Witness Coordination**: Issues electronic summons via live Gmail SMTP or physical bailiff service with authenticated Virtual Courtroom (VC) video links and Court Form No. 33 e-Summons generation.
+4. **Algorithmic Disparity & AI Bias Monitor**: Continuous mathematical fairness auditing adhering to EEOC 4/5ths (80%) Rule across demographics, wealth parity, and 11 police station jurisdictions.
+5. **Recommends conflict-free hearing dates** via a Smart Scheduler.
+6. **Provides visual analytics dashboards & printable reports** for judges, clerks, and administrators.
 
 ---
 
@@ -64,7 +65,20 @@ AI-Court-System/
 
 ## 🚀 Quick Start Installation Guide
 
-### Option A: Run via Docker Compose (Recommended)
+### Option A: One-Command Local Startup (Fastest & Recommended)
+Starts Backend Express API (Port 5000), AI Agent Microservice (Port 5001), and Vite Frontend (Port 5173) concurrently with embedded PostgreSQL (PGlite) auto-initialization and seeding:
+
+```bash
+node run-local.js
+```
+
+* 🌐 **Frontend Application**: [http://localhost:5173](http://localhost:5173)
+* ⚙️ **Backend Express API**: [http://localhost:5000](http://localhost:5000)
+* 🧠 **AI Agent Service**: [http://localhost:5001](http://localhost:5001)
+
+---
+
+### Option B: Run via Docker Compose
 This runs the database, backend server, React frontend, and AI simulator agent concurrently in linked containers.
 
 1. **Pre-requisite**: Install Docker Desktop on your operating system.
@@ -76,7 +90,7 @@ This runs the database, backend server, React frontend, and AI simulator agent c
 
 ---
 
-### Option B: Local Setup (Manual Installation)
+### Option C: Manual Setup (Individual Services)
 
 #### 1. Setup PostgreSQL Database
 - Install PostgreSQL on your local system.
