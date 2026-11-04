@@ -288,16 +288,14 @@ const Cases = () => {
           </p>
         </div>
 
-        {/* Register Case button */}
-        {(user?.role === 'Administrator' || user?.role === 'Court Clerk') && (
-          <button
-            onClick={() => { setShowModal(true); setCurrentStep(1); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-court-500 hover:bg-court-400 text-white font-semibold text-sm rounded-xl shadow-md shadow-court-500/10 active:scale-[0.98] transition-all"
-          >
-            <Plus size={18} />
-            <span>Register Case</span>
-          </button>
-        )}
+        {/* Register Case button (Accessible to all authenticated staff) */}
+        <button
+          onClick={() => { setShowModal(true); setCurrentStep(1); }}
+          className="flex items-center gap-2 px-4 py-2.5 bg-court-500 hover:bg-court-400 text-white font-semibold text-sm rounded-xl shadow-md shadow-court-500/10 active:scale-[0.98] transition-all"
+        >
+          <Plus size={18} />
+          <span>Register Case</span>
+        </button>
       </div>
 
       {/* Filter and Search Panel */}

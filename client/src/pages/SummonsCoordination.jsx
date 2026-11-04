@@ -51,6 +51,8 @@ const SummonsCoordination = () => {
   const [sendingTest, setSendingTest] = useState(false);
   const [viewForm33Summons, setViewForm33Summons] = useState(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [summonsFilter, setSummonsFilter] = useState('All');
+  const [summonsSearch, setSummonsSearch] = useState('');
 
   const fetchData = async () => {
     try {
@@ -213,6 +215,26 @@ const SummonsCoordination = () => {
   }
 
   const virtualSummonsCount = summonsList.filter(s => s.mode === 'Virtual VC' || s.mode === 'Hybrid').length;
+  
+  const filteredSummons = summonsList.filter(s => {
+    const matchesFilter = 
+      summonsFilter === 'All' ? true :
+      summonsFilter === 'Virtual VC' ? s.mode === 'Virtual VC' :
+      summonsFilter === 'Hybrid' ? s.mode === 'Hybrid' :
+      summonsFilter === 'In-Hand' ? (s.delivery_channel === 'Hand Delivery' || s.mode === 'Physical Courtroom') :
+      summonsFilter === 'Acknowledged' ? s.status === 'Acknowledged' : true;
+
+    const q = summonsSearch.toLowerCase().trim();
+    if (!q) return matchesFilter;
+
+    const matchesSearch = 
+      (s.summons_number && s.summons_number.toLowerCase().includes(q)) ||
+      (s.case_number && s.case_number.toLowerCase().includes(q)) ||
+      (s.case_title && s.case_title.toLowerCase().includes(q)) ||
+      (s.witness_name && s.witness_name.toLowerCase().includes(q));
+
+    return matchesFilter && matchesSearch;
+  });
 
   return (
     <div className="space-y-6">
@@ -361,6 +383,44 @@ const SummonsCoordination = () => {
             </div>
           </div>
 
+          {/* Filter Pills and Search Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4 pt-2 border-t border-gray-100 dark:border-court-800">
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
+              {[
+                { id: 'All', label: 'All Dockets (' + summonsList.length + ')' },
+                { id: 'Virtual VC', label: '🎥 Virtual VC (' + summonsList.filter(s => s.mode === 'Virtual VC').length + ')' },
+                { id: 'Hybrid', label: '⚖️ Hybrid (' + summonsList.filter(s => s.mode === 'Hybrid').length + ')' },
+                { id: 'In-Hand', label: '🏛️ In-Hand / Bailiff (' + summonsList.filter(s => s.delivery_channel === 'Hand Delivery' || s.mode === 'Physical Courtroom').length + ')' },
+                { id: 'Acknowledged', label: '✓ Acknowledged (' + summonsList.filter(s => s.status === 'Acknowledged').length + ')' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSummonsFilter(tab.id)}
+                  className={'px-3 py-1.5 rounded-xl font-bold transition-all ' + (
+                    summonsFilter === tab.id
+                      ? 'bg-court-600 text-white shadow-sm'
+                      : 'bg-gray-100 dark:bg-court-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-court-700'
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative w-full md:w-64">
+              <input
+                type="text"
+                placeholder="Search summons, case, witness..."
+                value={summonsSearch}
+                onChange={(e) => setSummonsSearch(e.target.value)}
+                className="w-full px-3 py-1.5 text-xs rounded-xl border border-gray-200 dark:border-court-800 bg-gray-50 dark:bg-court-950 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-court-500"
+              />
+              {summonsSearch && (
+                <button onClick={() => setSummonsSearch('')} className="absolute right-2.5 top-2 text-xs text-gray-400 hover:text-gray-600">×</button>
+              )}
+            </div>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -375,7 +435,7 @@ const SummonsCoordination = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-court-850 text-sm">
-                {summonsList.map((s) => (
+                {filteredSummons.map((s) => (
                   <tr key={s.id} className="hover:bg-gray-50/50 dark:hover:bg-court-850/50 transition-colors">
                     <td className="py-3.5 px-4 font-mono font-bold text-xs text-court-600 dark:text-court-300">
                       {s.summons_number}

@@ -51,13 +51,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       to: '/analytics',
       label: 'Analytics Dashboard',
       icon: BarChart3,
-      roles: ['Administrator', 'Judge']
+      roles: ['Administrator', 'Judge', 'Court Clerk']
     },
     {
       to: '/reports',
       label: 'Reports & Export',
       icon: FileText,
-      roles: ['Administrator', 'Judge']
+      roles: ['Administrator', 'Judge', 'Court Clerk']
     }
   ];
 

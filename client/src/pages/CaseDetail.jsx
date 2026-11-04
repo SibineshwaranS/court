@@ -248,7 +248,16 @@ const CaseDetail = () => {
           <ArrowLeft size={16} />
           <span>Back to Court Docket</span>
         </Link>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Direct Link to Summons */}
+          <Link
+            to="/summons"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs rounded-xl shadow-md transition-all active:scale-[0.98]"
+          >
+            <CalendarDays size={14} />
+            <span>Issue e-Summons & VC</span>
+          </Link>
+
           {/* Smart Scheduler Trigger */}
           {caseData.status !== 'Disposed' && (
             <button
