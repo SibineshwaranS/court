@@ -55,18 +55,38 @@ const SummonsCoordination = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [summonsRes, witnessesRes, casesRes] = await Promise.all([
+      
+      // Robust multi-endpoint fetch using allSettled to ensure cases ALWAYS load
+      const [summonsResult, witnessesResult, casesResult] = await Promise.allSettled([
         api.get('/summons'),
         api.get('/witnesses'),
         api.get('/cases?limit=100')
       ]);
 
-      setSummonsList(Array.isArray(summonsRes.data) ? summonsRes.data : []);
-      setWitnessesList(Array.isArray(witnessesRes.data) ? witnessesRes.data : []);
-      setCasesList(Array.isArray(casesRes.data?.cases) ? casesRes.data.cases : []);
-      setLoading(false);
+      if (summonsResult.status === 'fulfilled') {
+        const raw = summonsResult.value.data;
+        setSummonsList(Array.isArray(raw) ? raw : (raw?.data || []));
+      }
+
+      if (witnessesResult.status === 'fulfilled') {
+        const raw = witnessesResult.value.data;
+        setWitnessesList(Array.isArray(raw) ? raw : (raw?.data || []));
+      }
+
+      if (casesResult.status === 'fulfilled') {
+        const raw = casesResult.value.data;
+        const list = Array.isArray(raw?.cases)
+          ? raw.cases
+          : Array.isArray(raw?.data)
+            ? raw.data
+            : Array.isArray(raw)
+              ? raw
+              : [];
+        setCasesList(list);
+      }
     } catch (err) {
       console.error('Error fetching summons data:', err);
+    } finally {
       setLoading(false);
     }
   };
@@ -544,7 +564,9 @@ const SummonsCoordination = () => {
                   required
                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-250 dark:border-court-800 bg-white dark:bg-court-950 text-gray-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-court-500 outline-none"
                 >
-                  <option value="">-- Choose active case --</option>
+                  <option value="">
+                    {casesList.length === 0 ? "-- Loading registered cases... --" : "-- Choose active registered case --"}
+                  </option>
                   {casesList.map(c => (
                     <option key={c.id} value={c.id}>
                       {c.case_number} - {c.title} ({c.priority} Priority)

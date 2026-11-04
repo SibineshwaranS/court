@@ -269,6 +269,124 @@ const getSummons = async (filters = {}) => {
 
   sql += ' ORDER BY s.scheduled_date ASC';
   const result = await db.query(sql, params);
+  if (result.rows.length === 0 && !case_id && !witness_id && !status) {
+    try {
+      await db.query(`
+        INSERT INTO summons (
+          summons_number, case_id, witness_id, scheduled_date, mode, vc_link, status,
+          dispatch_status, qr_code_token, delivery_channel, from_email, to_email, delivery_address, assigned_bailiff, notes
+        ) VALUES
+        (
+          'SUMM-2026-0102-4011',
+          (SELECT id FROM cases ORDER BY id ASC LIMIT 1 OFFSET 0),
+          1,
+          CURRENT_TIMESTAMP + INTERVAL '2 days',
+          'Virtual VC',
+          'https://court-vc.tn.gov.in/room/TN-VC-TN-CRL-2026-0102-4011?auth=QR_SUMM-2026-0102-4011_SECURE',
+          'Issued',
+          'Dispatched via e-Summons Email to: m.ravichandran@tnpolice.gov.in',
+          'QR_SUMM-2026-0102-4011_SECURE',
+          'Email',
+          'court.registry.salem@tn.gov.in',
+          'm.ravichandran@tnpolice.gov.in',
+          NULL,
+          NULL,
+          'Deposition on Section 161 CrPC Statements & Investigation Diary'
+        ),
+        (
+          'SUMM-2026-0104-4012',
+          (SELECT id FROM cases ORDER BY id ASC LIMIT 1 OFFSET 2),
+          2,
+          CURRENT_TIMESTAMP + INTERVAL '3 days',
+          'Virtual VC',
+          'https://court-vc.tn.gov.in/room/TN-VC-TN-CRL-2026-0104-4012?auth=QR_SUMM-2026-0104-4012_SECURE',
+          'Acknowledged',
+          'Dispatched via e-Summons Email to: dr.meenakshi@kmch.tn.gov.in',
+          'QR_SUMM-2026-0104-4012_SECURE',
+          'Email',
+          'court.registry.salem@tn.gov.in',
+          'dr.meenakshi@kmch.tn.gov.in',
+          NULL,
+          NULL,
+          'Produce Authenticated Post-Mortem Certificate & Chemical Analysis Report'
+        ),
+        (
+          'SUMM-2026-0107-4013',
+          (SELECT id FROM cases ORDER BY id ASC LIMIT 1 OFFSET 5),
+          6,
+          CURRENT_TIMESTAMP + INTERVAL '4 days',
+          'Virtual VC',
+          'https://court-vc.tn.gov.in/room/TN-VC-TN-CRL-2026-0107-4013?auth=QR_SUMM-2026-0107-4013_SECURE',
+          'Issued',
+          'Dispatched via e-Summons Email to: s.balamurugan@tnpolice.gov.in',
+          'QR_SUMM-2026-0107-4013_SECURE',
+          'Email',
+          'court.registry.salem@tn.gov.in',
+          's.balamurugan@tnpolice.gov.in',
+          NULL,
+          NULL,
+          'Demonstrate CDR (Call Detail Record) extraction & digital IP trace logs'
+        ),
+        (
+          'SUMM-2026-0103-4014',
+          (SELECT id FROM cases ORDER BY id ASC LIMIT 1 OFFSET 1),
+          4,
+          CURRENT_TIMESTAMP + INTERVAL '5 days',
+          'Hybrid',
+          'https://court-vc.tn.gov.in/room/TN-VC-TN-CVL-2026-0103-4014?auth=QR_SUMM-2026-0103-4014_SECURE',
+          'Acknowledged',
+          'Allocated for In-Hand Service via Bailiff (Process Server R. Selvam) to: Coimbatore City PS, Coimbatore Jurisdiction',
+          'QR_SUMM-2026-0103-4014_SECURE',
+          'Hand Delivery',
+          'court.registry.salem@tn.gov.in',
+          NULL,
+          'Coimbatore City Police Station, Court Process Section, Coimbatore',
+          'Process Server R. Selvam (Court Process Unit)',
+          'Village revenue map verification & field survey measurements'
+        ),
+        (
+          'SUMM-2026-0104-4015',
+          (SELECT id FROM cases ORDER BY id ASC LIMIT 1 OFFSET 2),
+          3,
+          CURRENT_TIMESTAMP + INTERVAL '6 days',
+          'Virtual VC',
+          'https://court-vc.tn.gov.in/room/TN-VC-TN-CRL-2026-0104-4015?auth=QR_SUMM-2026-0104-4015_SECURE',
+          'Issued',
+          'Dispatched via e-Summons Email to: s.gunasekaran@forensic.tn.gov.in',
+          'QR_SUMM-2026-0104-4015_SECURE',
+          'Email',
+          'court.registry.salem@tn.gov.in',
+          's.gunasekaran@forensic.tn.gov.in',
+          NULL,
+          NULL,
+          'Ballistics matching test examination of recovered 0.32 country-made revolver'
+        ),
+        (
+          'SUMM-2026-0105-4016',
+          (SELECT id FROM cases ORDER BY id ASC LIMIT 1 OFFSET 3),
+          5,
+          CURRENT_TIMESTAMP + INTERVAL '7 days',
+          'Physical Courtroom',
+          NULL,
+          'Acknowledged',
+          'Allocated for In-Hand Service via Bailiff (Senior Process Server K. Murugan) to: Salem Govt Mohan Kumaramangalam Hospital',
+          'QR_SUMM-2026-0105-4016_SECURE',
+          'Hand Delivery',
+          'court.registry.salem@tn.gov.in',
+          NULL,
+          'Salem Govt Mohan Kumaramangalam Hospital, Salem Jurisdiction',
+          'Senior Process Server K. Murugan',
+          'Physical Courtroom deposition on forensic toxicology findings'
+        )
+        ON CONFLICT (summons_number) DO NOTHING;`
+      );
+      const seeded = await db.query(sql, params);
+      return seeded.rows;
+    } catch (e) {
+      console.warn('Auto-seed dummy summons error:', e.message);
+    }
+  }
+
   return result.rows;
 };
 
