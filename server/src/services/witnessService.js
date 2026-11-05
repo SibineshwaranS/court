@@ -311,14 +311,26 @@ const issueSummons = async ({
   const result = await db.query(insertSql, insertParams);
   const createdSummons = result.rows[0];
 
-  // Notify Court Clerk & Judicial Staff
-  await notificationService.createNotification({
-    userId,
-    title: `Digital Summons Issued (${summonsNumber})`,
-    message: `Summons issued to ${witness.name} for Case ${caseData.case_number}. Deposition on ${new Date(scheduledDate).toLocaleString()}`,
-    type: 'Summons',
-    link: '/summons'
-  });
+  // Notify Court Clerk & Judicial Staff (Safely wrapped)
+  try {
+    if (notificationService && typeof notificationService.createNotification === 'function') {
+      await notificationService.createNotification({
+        userId,
+        title: `Digital Summons Issued (${summonsNumber})`,
+        message: `Summons issued to ${witness.name} for Case ${caseData.case_number}. Deposition on ${new Date(scheduledDate).toLocaleString()}`,
+        type: 'Schedule Update',
+        link: '/summons'
+      });
+    } else if (notificationService && typeof notificationService.sendNotification === 'function' && userId) {
+      await notificationService.sendNotification(
+        userId,
+        `Digital Summons Issued (${summonsNumber}) for Case ${caseData.case_number}`,
+        'Schedule Update'
+      );
+    }
+  } catch (notifErr) {
+    console.warn('[WitnessService] Notification dispatch caught error (non-blocking):', notifErr.message);
+  }
 
   return {
     ...createdSummons,

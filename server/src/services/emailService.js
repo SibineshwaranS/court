@@ -34,7 +34,9 @@ async function getTransporter() {
 
   // Fallback: Generate real Ethereal SMTP test account
   try {
-    const testAccount = await nodemailer.createTestAccount();
+    const testAccountPromise = nodemailer.createTestAccount();
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Ethereal setup timed out')), 2500));
+    const testAccount = await Promise.race([testAccountPromise, timeoutPromise]);
     console.log(`[EmailService] Ethereal test SMTP account created: ${testAccount.user}`);
     cachedTransporter = nodemailer.createTransport({
       host: testAccount.smtp.host,
@@ -202,7 +204,9 @@ async function sendSummonsEmail(options) {
       html: htmlContent
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    const sendPromise = transporter.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('SMTP send timed out')), 3000));
+    const info = await Promise.race([sendPromise, timeoutPromise]);
     const previewUrl = nodemailer.getTestMessageUrl(info);
 
     console.log(`\n================= [EMAIL SUMMONS DISPATCHED] =================`);

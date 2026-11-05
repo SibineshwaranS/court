@@ -594,3 +594,4 @@ export const DEFAULT_SUMMONS = [
     notes: 'Permanent disability medical board certificate verification'
   }
 ];
+

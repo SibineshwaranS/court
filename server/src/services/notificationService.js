@@ -77,7 +77,63 @@ const notifyAdmins = async (message, type = 'In-App') => {
   }
 };
 
+/**
+ * Flexible createNotification supporting both object config and positional params
+ */
+const createNotification = async (payloadOrUserId, message, type = 'In-App') => {
+  try {
+    let targetUserId = null;
+    let finalMsg = '';
+    let finalType = 'In-App';
+
+    if (typeof payloadOrUserId === 'object' && payloadOrUserId !== null) {
+      targetUserId = payloadOrUserId.userId || payloadOrUserId.user_id;
+      const title = payloadOrUserId.title ? `[${payloadOrUserId.title}] ` : '';
+      finalMsg = `${title}${payloadOrUserId.message || ''}`;
+      finalType = payloadOrUserId.type || 'In-App';
+    } else {
+      targetUserId = payloadOrUserId;
+      finalMsg = message || '';
+      finalType = type || 'In-App';
+    }
+
+    // Ensure type conforms to database CHECK constraint:
+    // CHECK (type IN ('Email', 'SMS', 'In-App', 'Priority Alert', 'Schedule Update'))
+    const validTypes = ['Email', 'SMS', 'In-App', 'Priority Alert', 'Schedule Update'];
+    if (!validTypes.includes(finalType)) {
+      if (finalType.toLowerCase().includes('priority') || finalType.toLowerCase().includes('alert')) {
+        finalType = 'Priority Alert';
+      } else if (finalType.toLowerCase().includes('schedule') || finalType.toLowerCase().includes('summons')) {
+        finalType = 'Schedule Update';
+      } else {
+        finalType = 'In-App';
+      }
+    }
+
+    // If targetUserId is missing or unauthenticated, find first valid user in system
+    if (!targetUserId) {
+      try {
+        const u = await db.query('SELECT id FROM users ORDER BY id ASC LIMIT 1');
+        if (u.rows.length > 0) {
+          targetUserId = u.rows[0].id;
+        }
+      } catch (e) {
+        console.warn('[Notification Service] User fallback query note:', e.message);
+      }
+    }
+
+    if (targetUserId) {
+      return await sendNotification(targetUserId, finalMsg, finalType);
+    }
+    return null;
+  } catch (err) {
+    console.warn('[Notification Service] createNotification caught exception:', err.message);
+    return null;
+  }
+};
+
 module.exports = {
   sendNotification,
-  notifyAdmins
+  notifyAdmins,
+  createNotification
 };
